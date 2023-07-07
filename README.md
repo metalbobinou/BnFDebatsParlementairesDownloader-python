@@ -4,8 +4,7 @@ Downloader in python for the BnF collection "Débats Parlementaires" (Parliament
 # Requirements:
 - Python 3+
 - Beautiful Soup
-- Pyllica (included) [(GitHub Link)](https://github.com/Dorialexander/Pyllica)
-
 
 # Contributors:
-- BOISSIER Fabrice (Main Developper) [2023-...]
+- PUREN Marie (Main Consumer & Projet Leader) [2023-...]
+- BOISSIER Fabrice (Main Developper & Co-Projet Leader) [2023-...]
