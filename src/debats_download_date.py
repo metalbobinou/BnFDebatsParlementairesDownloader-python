@@ -6,10 +6,6 @@ import tempfile
 # HTTP & URL
 import urllib.request
 
-# Gallica
-from pyllicalabs import *
-
-
 #############################################################################
 ## The objective of this module is to download all of the JPG of an Ark ID ##
 #############################################################################
