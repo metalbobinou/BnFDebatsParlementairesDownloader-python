@@ -5,6 +5,9 @@ import os
 # Regexp
 import re
 
+# Date
+import datetime
+
 # HTTP & URL
 import urllib.request
 
@@ -24,8 +27,8 @@ import urllib.request
 # File containing the last line read
 g_file_last_line_name = "__last_url_resolved.cache"
 
-# Error log file
-g_file_error_log_name = "debats_get_ark_id_ERRORS.log"
+# File with unresolved URL
+prefix_unresolved_file_name = "unresolved_"
 
 # Send a GET request with a date URL, and obtain the resolved one as answer
 def get_ressource_url(url):
@@ -119,8 +122,14 @@ def get_ark_id_from_date_URL(url_date):
         print("## Error :")
         print("  no ressource found")
         print("url_date : --" + url_date + "--")
-
         return (None)
+
+    # if URL hasn't changed, let's return it and write an error...
+    if (url_resolved == url_date):
+        print("## Warning :")
+        print("  URL hasn't changed. Let's skip it...")
+        print("url_date : --" + url_date + "--")
+        return (url_date)
 
     # if the date has been resolved;, let's parse it for Ark ID
     ## first, let's remove the suffix if it exists : the final ".item"
@@ -146,9 +155,10 @@ def update_file_last_line(cur_line):
     fd.write(str(cur_line))
     fd.close()
 
-# Add an error to the error log
-def update_file_error_log(msg):
-    fd = open(g_file_error_log_name, 'a')
+# Add a URL to the unresolved log
+def update_file_unresolved_log(msg):
+    unresolved_filename = prefix_unresolved_file_name + sys.argv[1]
+    fd = open(unresolved_filename, 'a')
     fd.write(str(msg) + "\n")
     fd.close()
 
@@ -169,10 +179,10 @@ def main():
         print("File list_of_URLs format: [one URL per line]")
         return (-1)
     else:
-        url_file_input = sys.argv[1]
+        url_filename_input = sys.argv[1]
         # Check if file is readable
         try:
-            with open(url_file_input) as fd:
+            with open(url_filename_input) as fd:
                 ## Put the whole file in memory in a list
                 lines = [line.rstrip() for line in fd]
                 #### OR ####
@@ -198,14 +208,14 @@ def main():
             file_last_line = fd.read()
             fd.close()
             cur_line = int(file_last_line)
-        ## Prepare an error log for failed downloads
-        if (os.path.isfile(g_file_last_line_name)):
-            fd_err = open(g_file_error_log_name, "w")
-            fd_err.truncate(0)
-            fd_err.close()
+
+        ## Update the unresolved log for saying an instance has been launched
+        now = datetime.datetime.now()
+        update_file_unresolved_log("# Launching URL resolver for debates at " +
+                                   now.strftime("%d/%m/%Y %H:%M:%S"))
 
         # Continue the process of the file from the last state
-        url_resolved_outfile = "resolved_" + url_file_input
+        url_resolved_filename_output = "resolved_" + url_filename_input
         while (cur_line != max_line):
             url = lines[cur_line]
             ark_id = get_ark_id_from_date_URL(url)
@@ -215,14 +225,25 @@ def main():
                 update_file_error_log("Failed at line " + str(cur_line))
                 update_file_error_log("URL : " + url)
                 return (-3)
-            # if everything OK, let's write the result in the output file[[O
-            update_file_ouput(ark_id, url_resolved_outfile)
+
+            # if URL hasn't changed, let's skip it (add write it in the unresolved log)
+            if (ark_id == url):
+                update_file_unresolved_log(url)
+                cur_line += 1
+                continue
+
+            # if everything OK, let's write the result in the output file
+            update_file_ouput(ark_id, url_resolved_filename_output)
             # read next line
             cur_line += 1
 
         # If everything ended well, let's remove the cache file with last state
         if (os.path.exists(g_file_last_line_name)):
             os.remove(g_file_last_line_name)
+        # And let's rename the final resolved list by adding a "_FINAL" inside
+        url_resolved_filename_final = os.path.splitext(url_resolved_filename_output)[0]
+        url_resolved_filename_final = url_resolved_filename_final + "_final.txt"
+        os.rename(url_resolved_filename_output, url_resolved_filename_final)
 
 main()
 
