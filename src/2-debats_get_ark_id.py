@@ -220,6 +220,10 @@ def main():
             # read next line
             cur_line += 1
 
+        # If everything ended well, let's remove the cache file with last state
+        if (os.path.exists(g_file_last_line_name)):
+            os.remove(g_file_last_line_name)
+
 main()
 
 # MAIN OF TEST
