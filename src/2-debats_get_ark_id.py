@@ -30,6 +30,63 @@ g_file_last_line_name = "__last_url_resolved.cache"
 # File with unresolved URL
 prefix_unresolved_file_name = "unresolved_"
 
+### Small tools
+
+# Generate a string with the date ad time
+def get_date_and_time():
+    now = datetime.datetime.now()
+    str_time = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+    return (str_time)
+
+# Update the cache recording last line processed
+def update_file_last_line(cur_line):
+    fd = open(g_file_last_line_name, 'w')
+    fd.truncate(0)
+    fd.write(str(cur_line))
+    fd.close()
+
+# Add a URL to the unresolved log
+def update_file_unresolved_log(msg):
+    unresolved_filename = prefix_unresolved_file_name + sys.argv[1]
+    fd = open(unresolved_filename, 'a')
+    fd.write(str(msg) + "\n")
+    fd.close()
+
+# Add a line in a file
+def update_file_ouput(url_resolved, filename_output):
+    fd = open(filename_output, 'a')
+    fd.write(str(url_resolved) + "\n")
+    fd.close()
+
+# Remove the ".item" suffix if it exists
+def remove_suffix_item_from_url(url):
+    match = re.search('\.item$', url)
+    # if no ".item" found, let's send back the URL
+    if (match == None):
+        return (url)
+
+    # if ".item" found, let's remove it
+    #print(str(match.group(0))
+    #print(str(match.start(0)))
+    #print(str(match.end(0)))
+    no_item_url = url[:match.start(0)]
+    #print(str(no_item_url))
+    return (no_item_url)
+
+# Remove the http[s]://gallica.bnf.fr/ark: prefix in a URL
+def remove_prefix_https_from_url(url):
+    match = re.search('^https?://gallica\.bnf\.fr/ark:', url)
+    # if no prefix found, let's send back the URL
+    if (match == None):
+        return (None)
+
+    # if prefix is found, let's keep only the ark id following it
+    ark_id = url[match.end(0):]
+    return (ark_id)
+
+
+### Main URL resolver
+
 # Send a GET request with a date URL, and obtain the resolved one as answer
 def get_ressource_url(url):
     print("## Getting new URL for : " + str(url))
@@ -87,32 +144,6 @@ def get_ressource_url(url):
         return (url_new)
 
 
-# Remove the ".item" suffix if it exists
-def remove_suffix_item_from_url(url):
-    match = re.search('\.item$', url)
-    # if no ".item" found, let's send back the URL
-    if (match == None):
-        return (url)
-
-    # if ".item" found, let's remove it
-    #print(str(match.group(0))
-    #print(str(match.start(0)))
-    #print(str(match.end(0)))
-    no_item_url = url[:match.start(0)]
-    #print(str(no_item_url))
-    return (no_item_url)
-
-# Remove the http[s]://gallica.bnf.fr/ark: prefix in a URL
-def remove_prefix_https_from_url(url):
-    match = re.search('^https?://gallica\.bnf\.fr/ark:', url)
-    # if no prefix found, let's send back the URL
-    if (match == None):
-        return (None)
-
-    # if prefix is found, let's keep only the ark id following it
-    ark_id = url[match.end(0):]
-    return (ark_id)
-
 # Resolve a URL and extract its Ark ID
 def get_ark_id_from_date_URL(url_date):
     # Let's resolve date URL and obtain the new URL
@@ -148,25 +179,59 @@ def get_ark_id_from_date_URL(url_date):
     # Ark ID has been found
     return (ark_id)
 
-# Update the cache recording last line processed
-def update_file_last_line(cur_line):
-    fd = open(g_file_last_line_name, 'w')
-    fd.truncate(0)
-    fd.write(str(cur_line))
-    fd.close()
+# For each line, try to resolve it, or write in unresolved logs that it failed
+def process_lines(lines):
+    url_filename_input = sys.argv[1]
 
-# Add a URL to the unresolved log
-def update_file_unresolved_log(msg):
-    unresolved_filename = prefix_unresolved_file_name + sys.argv[1]
-    fd = open(unresolved_filename, 'a')
-    fd.write(str(msg) + "\n")
-    fd.close()
+    # File has been read and is in memory, everything is fine
+    cur_line = 0
+    max_line = len(lines)
+    ## Open the temporary file for last processed line
+    if (os.path.isfile(g_file_last_line_name)):
+        fd = open(g_file_last_line_name, "r")
+        file_last_line = fd.read()
+        fd.close()
+        cur_line = int(file_last_line)
 
-# Add a line in a file
-def update_file_ouput(url_resolved, filename_output):
-    fd = open(filename_output, 'a')
-    fd.write(str(url_resolved) + "\n")
-    fd.close()
+    ## Update the unresolved log for saying an instance has been launched
+    now = datetime.datetime.now()
+    update_file_unresolved_log("# Launching URL resolver for debates at " +
+                                   now.strftime("%d/%m/%Y %H:%M:%S"))
+
+    # Continue the process of the file from the last state
+    url_resolved_filename_output = "resolved_" + url_filename_input
+    while (cur_line != max_line):
+        url = lines[cur_line]
+        ark_id = get_ark_id_from_date_URL(url)
+        # if ark_id was not found, write down the number where it failed and stop
+        if (ark_id == None):
+            update_file_last_line(cur_line)
+            update_file_error_log("Failed at line " + str(cur_line))
+            update_file_error_log("URL : " + url)
+            return (-3)
+
+        # if URL hasn't changed, let's skip it (add write it in the unresolved log)
+        if (ark_id == url):
+            update_file_unresolved_log(url)
+            cur_line += 1
+            continue
+
+        # if everything OK, let's write the result in the output file
+        update_file_ouput(ark_id, url_resolved_filename_output)
+        print("#############################################################")
+        # read next line
+        cur_line += 1
+
+    # If everything ended well, let's remove the cache file with last state
+    if (os.path.exists(g_file_last_line_name)):
+        os.remove(g_file_last_line_name)
+    # And let's rename the final resolved list by adding a "_FINAL" inside
+    url_resolved_filename_final = os.path.splitext(url_resolved_filename_output)[0]
+    url_resolved_filename_final = url_resolved_filename_final + "_final.txt"
+    os.rename(url_resolved_filename_output, url_resolved_filename_final)
+
+    return (0)
+
 
 # Check for arguments in the CLI
 def main():
@@ -199,54 +264,10 @@ def main():
             print("File list_of_URLs format: [one URL per line]")
             return (-2)
 
-        # File has been read and is in memory, everything is fine
-        cur_line = 0
-        max_line = len(lines)
-        ## Open the temporary file for last processed line
-        if (os.path.isfile(g_file_last_line_name)):
-            fd = open(g_file_last_line_name, "r")
-            file_last_line = fd.read()
-            fd.close()
-            cur_line = int(file_last_line)
+        # In other case, when evrything is fine, let's process lines
+        ret = process_lines(lines)
 
-        ## Update the unresolved log for saying an instance has been launched
-        now = datetime.datetime.now()
-        update_file_unresolved_log("# Launching URL resolver for debates at " +
-                                   now.strftime("%d/%m/%Y %H:%M:%S"))
-
-        # Continue the process of the file from the last state
-        url_resolved_filename_output = "resolved_" + url_filename_input
-        while (cur_line != max_line):
-            url = lines[cur_line]
-            ark_id = get_ark_id_from_date_URL(url)
-            # if ark_id was not found, write down the number where it failed and stop
-            if (ark_id == None):
-                update_file_last_line(cur_line)
-                update_file_error_log("Failed at line " + str(cur_line))
-                update_file_error_log("URL : " + url)
-                return (-3)
-
-            # if URL hasn't changed, let's skip it (add write it in the unresolved log)
-            if (ark_id == url):
-                update_file_unresolved_log(url)
-                cur_line += 1
-                continue
-
-            # if everything OK, let's write the result in the output file
-            update_file_ouput(ark_id, url_resolved_filename_output)
-            print("#############################################################")
-            # read next line
-            cur_line += 1
-
-        # If everything ended well, let's remove the cache file with last state
-        if (os.path.exists(g_file_last_line_name)):
-            os.remove(g_file_last_line_name)
-        # And let's rename the final resolved list by adding a "_FINAL" inside
-        url_resolved_filename_final = os.path.splitext(url_resolved_filename_output)[0]
-        url_resolved_filename_final = url_resolved_filename_final + "_final.txt"
-        os.rename(url_resolved_filename_output, url_resolved_filename_final)
-
-        return (0)
+        return (ret)
 
 main()
 
