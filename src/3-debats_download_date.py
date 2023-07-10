@@ -43,6 +43,7 @@ g_file_last_line_name = "__last_ark_id_downloaded.cache"
 # File with unresolved URL
 prefix_undownloaded_file_name = "undownloaded_"
 
+### Small tools
 
 # Generate a string with the date ad time
 def get_date_and_time():
@@ -59,13 +60,36 @@ def split_ark_id(ark_id):
     split = re.split("/", ark_id)
     return (split[1:len(split)])
 
+# Update the cache recording last line processed
+def update_file_last_line(cur_line):
+    fd = open(g_file_last_line_name, 'w')
+    fd.truncate(0)
+    fd.write(str(cur_line))
+    fd.close()
+
+# Add a URL to the undownloaded log
+def update_file_undownloaded_log(msg):
+    undownloaded_filename = prefix_undownloaded_file_name + sys.argv[1]
+    fd = open(undownloaded_filename, 'a')
+    fd.write(str(msg) + "\n")
+    fd.close()
+
+# Add a line in a file
+def update_file_ouput(url_resolved, filename_output):
+    fd = open(filename_output, 'a')
+    fd.write(str(url_resolved) + "\n")
+    fd.close()
+
 # Create a directory if it does not exist
 def prepare_out_directory(directory):
     isExist = os.path.exists(directory)
     if not isExist:
         os.makedirs(directory)
 
-# Download each JPG until an error occurs (when the end of document is reached)
+
+### Main JPEG downloader
+
+# Download each JPG until an error 503 occurs (when the end of document is reached)
 ### identifier = ark_id
 ### directory = directory where to put files
 ### prefix_filename = output file prefix
@@ -168,25 +192,63 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
     # Let's return the number of pages written
     return (page)
 
-# Update the cache recording last line processed
-def update_file_last_line(cur_line):
-    fd = open(g_file_last_line_name, 'w')
-    fd.truncate(0)
-    fd.write(str(cur_line))
-    fd.close()
 
-# Add a URL to the undownloaded log
-def update_file_undownloaded_log(msg):
-    undownloaded_filename = prefix_undownloaded_file_name + sys.argv[1]
-    fd = open(undownloaded_filename, 'a')
-    fd.write(str(msg) + "\n")
-    fd.close()
+# For each line, try to download all of the JPEG
+def process_lines(lines):
+    # File has been read and is in memory, everything is fine
+    cur_line = 0
+    max_line = len(lines)
+    ## Open the temporary file for last processed line
+    if (os.path.isfile(g_file_last_line_name)):
+        fd = open(g_file_last_line_name, "r")
+        file_last_line = fd.read()
+        fd.close()
+        cur_line = int(file_last_line)
 
-# Add a line in a file
-def update_file_ouput(url_resolved, filename_output):
-    fd = open(filename_output, 'a')
-    fd.write(str(url_resolved) + "\n")
-    fd.close()
+    ## Update the undownloaded log for saying an instance has been launched
+    now = datetime.datetime.now()
+    update_file_undownloaded_log("# Launching Ark ID downloader for debates at " +
+                                     now.strftime("%d/%m/%Y %H:%M:%S"))
+
+    # Continue the process of the file from the last state
+    while (cur_line != max_line):
+        ark_id = lines[cur_line]
+
+        ark_id_splitted = split_ark_id(ark_id)
+        dirname = "output_JPG" + "/" + str(ark_id_splitted[1])
+        filename_prefix = str(ark_id_splitted[1])
+
+        # Ark ID, directory output, filename prefix
+        pages_written = get_document_debat_parlementaire(ark_id,
+                                                         dirname,
+                                                         filename_prefix)
+
+        ## If an error occurred, let's save where we were
+        #if (pages_written == None):
+        #    update_file_last_line(cur_line)
+        #    update_file_error_log("Failed at line " + str(cur_line))
+        #    update_file_error_log("Ark ID : " + ark_id)
+        #    return (-3)
+
+        ## If only one page were written... do something ? [probably unusable]
+        #if (pages_written == 1):
+        #    update_file_unresolved_log(url)
+        #    cur_line += 1
+        #    continue
+        ######################
+
+        print("#############################################################")
+        # read next line
+        cur_line += 1
+
+    # If everything ended well, let's remove the cache file with last state
+    if (os.path.exists(g_file_last_line_name)):
+        os.remove(g_file_last_line_name)
+    # And let's rename the folder by adding a "_FINAL" inside
+    dirname_final = "output_JPG" + "_" + get_date_and_time()
+    os.rename("output_JPG",  dirname_final)
+
+    return (0)
 
 # Check for arguments in the CLI
 def main():
@@ -219,60 +281,11 @@ def main():
             print("File list_of_Ark_IDs format: [one Ark ID per line]")
             return (-2)
 
-        # File has been read and is in memory, everything is fine
-        cur_line = 0
-        max_line = len(lines)
-        ## Open the temporary file for last processed line
-        if (os.path.isfile(g_file_last_line_name)):
-            fd = open(g_file_last_line_name, "r")
-            file_last_line = fd.read()
-            fd.close()
-            cur_line = int(file_last_line)
 
-        ## Update the undownloaded log for saying an instance has been launched
-        now = datetime.datetime.now()
-        update_file_undownloaded_log("# Launching Ark ID downloader for debates at " +
-                                     now.strftime("%d/%m/%Y %H:%M:%S"))
+        # In other case, when evrything is fine, let's process lines
+        ret = process_lines(lines)
 
-        # Continue the process of the file from the last state
-        while (cur_line != max_line):
-            ark_id = lines[cur_line]
-
-            ark_id_splitted = split_ark_id(ark_id)
-            dirname = "output_JPG" + "/" + str(ark_id_splitted[1])
-            filename_prefix = str(ark_id_splitted[1])
-
-            # Ark ID, directory output, filename prefix
-            pages_written = get_document_debat_parlementaire(ark_id,
-                                                             dirname,
-                                                             filename_prefix)
-
-            # if an error occurred, let's save where we were
-            #if (pages_written == None):
-            #    update_file_last_line(cur_line)
-            #    update_file_error_log("Failed at line " + str(cur_line))
-            #    update_file_error_log("Ark ID : " + ark_id)
-            #    return (-3)
-
-            # if only one page were written... do something ? [probably unusable]
-            #if (pages_written == 1):
-            #    update_file_unresolved_log(url)
-            #    cur_line += 1
-            #    continue
-            ######################
-
-            print("#############################################################")
-            # read next line
-            cur_line += 1
-
-        # If everything ended well, let's remove the cache file with last state
-        if (os.path.exists(g_file_last_line_name)):
-            os.remove(g_file_last_line_name)
-        # And let's rename the folder by adding a "_FINAL" inside
-        dirname_final = "output_JPG" + "_" + get_date_and_time()
-        os.rename("output_JPG",  dirname_final)
-
-    return (0)
+        return (ret)
 
 main()
 
