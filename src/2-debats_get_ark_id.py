@@ -162,7 +162,7 @@ def update_file_unresolved_log(msg):
     fd.write(str(msg) + "\n")
     fd.close()
 
-# Add an error to the error log
+# Add a line in a file
 def update_file_ouput(url_resolved, filename_output):
     fd = open(filename_output, 'a')
     fd.write(str(url_resolved) + "\n")
@@ -244,6 +244,8 @@ def main():
         url_resolved_filename_final = os.path.splitext(url_resolved_filename_output)[0]
         url_resolved_filename_final = url_resolved_filename_final + "_final.txt"
         os.rename(url_resolved_filename_output, url_resolved_filename_final)
+
+        return (0)
 
 main()
 
