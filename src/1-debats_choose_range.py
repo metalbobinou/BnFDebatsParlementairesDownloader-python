@@ -69,7 +69,13 @@ def transform_list_of_dates_into_url(list_of_dates, url_prefix, url_suffix):
         str_triplet = str(triplet[2]) + str(triplet[1]) + str(triplet[0])
         # URL building
         url = url_prefix + str_triplet + url_suffix
-        list_of_url.append(url)
+        ### Add a date before the URL (" " is a good separator)
+        # Date string : YYYY-mm-dd
+        str_date = str(triplet[2]) + "-" + str(triplet[1]) + "-" + str(triplet[0])
+        line = str_date + " " + url
+        ###
+        #list_of_url.append(url)
+        list_of_url.append(line)
 
     return (list_of_url)
 

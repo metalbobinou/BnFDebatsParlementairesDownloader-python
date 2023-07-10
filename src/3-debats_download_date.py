@@ -45,11 +45,32 @@ prefix_undownloaded_file_name = "undownloaded_"
 
 ### Small tools
 
-# Generate a string with the date ad time
+# Generate a string with the date and time
 def get_date_and_time():
     now = datetime.datetime.now()
     str_time = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
     return (str_time)
+# Generate a string with the date
+def get_date():
+    now = datetime.datetime.now()
+    str_time = now.strftime("%Y-%m-%d")
+    return (str_time)
+# Generate a string with the time
+def get_time():
+    now = datetime.datetime.now()
+    str_time = now.strftime("%Hh%Mm%Ss")
+    return (str_time)
+
+# Get the day of the week from a date in str (YYYY-MM-DD)
+def get_day_or_the_week(date):
+    datetime_object = datetime.datetime.strptime(date, "%Y-%m-%d")
+    # weekday() : Monday = 0 ... Sunday = 6
+    int_DOTW = datetime_object.weekday()
+    # isoweekday() : Monday = 1 ... Sunday = 7
+    iso_DOTW = datetime_object.isoweekday()
+    # named day of the week
+    DOTW = datetime_object.strftime('%A')
+    return (DOTW)
 
 # Split the Ark ID into a list
 def split_ark_id(ark_id):
@@ -208,15 +229,21 @@ def process_lines(lines):
     ## Update the undownloaded log for saying an instance has been launched
     now = datetime.datetime.now()
     update_file_undownloaded_log("# Launching Ark ID downloader for debates at " +
-                                     now.strftime("%d/%m/%Y %H:%M:%S"))
+                                 now.strftime("%d/%m/%Y %H:%M:%S"))
 
     # Continue the process of the file from the last state
     while (cur_line != max_line):
-        ark_id = lines[cur_line]
+        #ark_id = lines[cur_line]
+        ### Manages file with 2 columns
+        line = lines[cur_line]
+        line_split = re.split(" ", line)
+        date = line_split[0]
+        ark_id = line_split[1]
+        ###
 
         ark_id_splitted = split_ark_id(ark_id)
-        dirname = "output_JPG" + "/" + str(ark_id_splitted[1])
-        filename_prefix = str(ark_id_splitted[1])
+        dirname = "output_WIP_JPG" + "/" + date + "_" + str(ark_id_splitted[1])
+        filename_prefix = date + "_" + str(ark_id_splitted[1])
 
         # Ark ID, directory output, filename prefix
         pages_written = get_document_debat_parlementaire(ark_id,
@@ -246,7 +273,7 @@ def process_lines(lines):
         os.remove(g_file_last_line_name)
     # And let's rename the folder by adding a "_FINAL" inside
     dirname_final = "output_JPG" + "_" + get_date_and_time()
-    os.rename("output_JPG",  dirname_final)
+    os.rename("output_WIP_JPG",  dirname_final)
 
     return (0)
 
@@ -259,6 +286,8 @@ def main():
         print("Usage: " + sys.argv[0] + " list_of_Ark_IDs")
         print("")
         print("File list_of_Ark_IDs format: [one Ark ID per line]")
+        print("[date] [Ark ID]")
+        print("date : YYYY-MM-DD     Ark ID : /12148/bpt6k64490143")
         return (-1)
     else:
         ark_id_filename_input = sys.argv[1]
@@ -279,6 +308,8 @@ def main():
             print("Usage: " + sys.argv[0] + " list_of_Ark_IDs")
             print("")
             print("File list_of_Ark_IDs format: [one Ark ID per line]")
+            print("[date] [Ark ID]")
+            print("date : YYYY-MM-DD     Ark ID : /12148/bpt6k64490143")
             return (-2)
 
 
