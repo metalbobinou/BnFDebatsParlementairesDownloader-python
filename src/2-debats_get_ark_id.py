@@ -234,6 +234,7 @@ def main():
 
             # if everything OK, let's write the result in the output file
             update_file_ouput(ark_id, url_resolved_filename_output)
+            print("#############################################################")
             # read next line
             cur_line += 1
 

@@ -1,7 +1,12 @@
 # Files
+import sys
 import os
-import shutil
-import tempfile
+
+# Regexp
+import re
+
+# Date
+import datetime
 
 # HTTP & URL
 import urllib.request
@@ -32,6 +37,29 @@ import urllib.request
 ##
 ##############################################################################
 
+# File containing the last line read
+g_file_last_line_name = "__last_ark_id_downloaded.cache"
+
+# File with unresolved URL
+prefix_undownloaded_file_name = "undownloaded_"
+
+
+# Generate a string with the date ad time
+def get_date_and_time():
+    now = datetime.datetime.now()
+    str_time = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+    return (str_time)
+
+# Split the Ark ID into a list
+def split_ark_id(ark_id):
+    # Ark ID : /12148/bpt6k6449020t
+    #match = re.match("/([a-aA-Z_0-9]*)", ark_id)
+    #return (match.groups())
+    # Spli the string by the '/' and remove the empty 1st
+    split = re.split("/", ark_id)
+    return (split[1:len(split)])
+
+# Create a directory if it does not exist
 def prepare_out_directory(directory):
     isExist = os.path.exists(directory)
     if not isExist:
@@ -39,38 +67,30 @@ def prepare_out_directory(directory):
 
 # Download each JPG until an error occurs (when the end of document is reached)
 ### identifier = ark_id
+### directory = directory where to put files
 ### prefix_filename = output file prefix
-def get_document_debat_parlementaire(identifier, directory, prefix_filename):
-    print("#### Downloading document " + str(identifier) +
-          " to " + str(directory) + "/" + str(prefix_filename))
+def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
+    print("#### Processing document " + str(ark_id) +
+          " to " + str(directory_output) + "/" + str(filename_prefix))
     print("")
 
-    prepare_out_directory(directory)
+    prepare_out_directory(directory_output)
 
     page_exist = True
     page = 1
     while (page_exist):
-        jpgfile = prefix_filename + "_" + str(page) + ".jpeg"
-        url = 'http://gallica.bnf.fr/ark:' + identifier + '/f' + str(page) + '.image/f' + str(page) +'.jpeg?download=1'
-
         # Try to download a page
-        print("## Downloading page " + str(page))
+        print("## Downloading page " + str(page) + " (" + ark_id + ")")
 
-        ## Obsolete method
-        #try:
-        #    filename, headers = urllib.request.urlretrieve(url, jpgfile)
-        #    print("## headers of page " + str(page))
-        #    print("#########################")
-        #    print(headers)
-        #    print("#########################")
-        #    os.rename(jpgfile, directory + jpgfile)
-        #    page += 1
-        #
-        # If an error occured, it might be because there are no more pages
-        #except Exception as e:
-        #    print("Error (" + str(type(e)) + ") on " + str(identifier))
-        #    page_exist = False
-        #    raise
+        # Filename of the JPEG after download
+        jpgfile = filename_prefix + "_" + str(page) + ".jpeg"
+
+        # URL of the JPEG to reach for this Ark ID
+        #url = 'http://gallica.bnf.fr/ark:' + ark_id + '/f' + str(page) + '.image/f' + str(page) +'.jpeg?download=1'
+        url_gallica_prefix = 'http://gallica.bnf.fr/ark:'
+        url_ark_id = ark_id
+        url_page = '/f' + str(page) + '.image/f' + str(page) + '.jpeg?download=1'
+        url = url_gallica_prefix + url_ark_id + url_page
 
         # Prepare request
         req = urllib.request.Request(url)
@@ -95,8 +115,9 @@ def get_document_debat_parlementaire(identifier, directory, prefix_filename):
                 print('Error code: ', e.code)
                 ## Error 503 : we reached the end of the document
                 if ((int(e.code) == 503) and (page != 1)):
-                    print("# Stopped at page " + str(page))
+                    print("# Stopped at page " + str(page) + " with HTTP 503")
                     return (None)
+            print("# Stopped at page " + str(page))
             print("#############")
             print(e.read())
             print("#############")
@@ -113,6 +134,7 @@ def get_document_debat_parlementaire(identifier, directory, prefix_filename):
             if hasattr(e, 'code'):
                 print('The server couldn\'t fulfill the request.')
                 print('Error code: ', e.code)
+            print("# Stopped at page " + str(page))
             print("#############")
             print(e.read())
             print("#############")
@@ -122,23 +144,137 @@ def get_document_debat_parlementaire(identifier, directory, prefix_filename):
 
         # Everything is fine
         else:
-            print("OK")
+            print("OK - p." + str(page))
 
+            # Get HTTP response
             data = response.read()
             info = response.info()
             url_new = response.url
             headers = response.headers
             #text = data.decode(info.get_param('charset', 'utf-8'))
             #text = data.decode('utf-8')
-
             print("## url_new : " + str(url_new))
             print("## headers : " + str(headers))
-            out_file = open(directory + "/" + jpgfile, 'wb')
+
+            # Write out the current file
+            out_file = open(directory_output + "/" + jpgfile, 'wb')
             out_file.truncate(0)
             out_file.write(data)
             out_file.close()
 
+            print("###################################")
             page += 1
+
+    # Let's return the number of pages written
+    return (page)
+
+# Update the cache recording last line processed
+def update_file_last_line(cur_line):
+    fd = open(g_file_last_line_name, 'w')
+    fd.truncate(0)
+    fd.write(str(cur_line))
+    fd.close()
+
+# Add a URL to the undownloaded log
+def update_file_undownloaded_log(msg):
+    undownloaded_filename = prefix_undownloaded_file_name + sys.argv[1]
+    fd = open(undownloaded_filename, 'a')
+    fd.write(str(msg) + "\n")
+    fd.close()
+
+# Add a line in a file
+def update_file_ouput(url_resolved, filename_output):
+    fd = open(filename_output, 'a')
+    fd.write(str(url_resolved) + "\n")
+    fd.close()
+
+# Check for arguments in the CLI
+def main():
+    # Check for missing arguments
+    if (len(sys.argv) != 2):
+        print("Missing parameters")
+        print("")
+        print("Usage: " + sys.argv[0] + " list_of_Ark_IDs")
+        print("")
+        print("File list_of_Ark_IDs format: [one Ark ID per line]")
+        return (-1)
+    else:
+        ark_id_filename_input = sys.argv[1]
+        # Check if file is readable
+        try:
+            with open(ark_id_filename_input) as fd:
+                ## Put the whole file in memory in a list
+                lines = [line.rstrip() for line in fd]
+                #### OR ####
+                ## Read and process file line by line (one read per line)
+                #for line in fd:
+                #    print(line.rstrip())
+
+        # If file is unreadable, let's manage the exception
+        except IOError:
+            print("File " + ark_id_file_input + " must exist and be readable")
+            print("")
+            print("Usage: " + sys.argv[0] + " list_of_Ark_IDs")
+            print("")
+            print("File list_of_Ark_IDs format: [one Ark ID per line]")
+            return (-2)
+
+        # File has been read and is in memory, everything is fine
+        cur_line = 0
+        max_line = len(lines)
+        ## Open the temporary file for last processed line
+        if (os.path.isfile(g_file_last_line_name)):
+            fd = open(g_file_last_line_name, "r")
+            file_last_line = fd.read()
+            fd.close()
+            cur_line = int(file_last_line)
+
+        ## Update the undownloaded log for saying an instance has been launched
+        now = datetime.datetime.now()
+        update_file_undownloaded_log("# Launching Ark ID downloader for debates at " +
+                                     now.strftime("%d/%m/%Y %H:%M:%S"))
+
+        # Continue the process of the file from the last state
+        while (cur_line != max_line):
+            ark_id = lines[cur_line]
+
+            ark_id_splitted = split_ark_id(ark_id)
+            dirname = "output_JPG" + "/" + str(ark_id_splitted[1])
+            filename_prefix = str(ark_id_splitted[1])
+
+            # Ark ID, directory output, filename prefix
+            pages_written = get_document_debat_parlementaire(ark_id,
+                                                             dirname,
+                                                             filename_prefix)
+
+            # if an error occurred, let's save where we were
+            #if (pages_written == None):
+            #    update_file_last_line(cur_line)
+            #    update_file_error_log("Failed at line " + str(cur_line))
+            #    update_file_error_log("Ark ID : " + ark_id)
+            #    return (-3)
+
+            # if only one page were written... do something ? [probably unusable]
+            #if (pages_written == 1):
+            #    update_file_unresolved_log(url)
+            #    cur_line += 1
+            #    continue
+            ######################
+
+            print("#############################################################")
+            # read next line
+            cur_line += 1
+
+        # If everything ended well, let's remove the cache file with last state
+        if (os.path.exists(g_file_last_line_name)):
+            os.remove(g_file_last_line_name)
+        # And let's rename the folder by adding a "_FINAL" inside
+        dirname_final = "output_JPG" + "_" + get_date_and_time()
+        os.rename("output_JPG",  dirname_final)
+
+    return (0)
+
+main()
 
 
 # MAIN OF TEST
