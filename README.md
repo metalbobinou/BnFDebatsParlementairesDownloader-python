@@ -11,11 +11,16 @@ Downloader in python for the BnF collection "Débats Parlementaires" (Parliament
 3) __3-debats_download_date.py__ downloads all of the pictures of an Ark ID of a debate (it stopsz when there is a 503 error/all pages where consumed)
 
 # How to Use:
-- Calls the script 1 with the two dates creating a range.
+- Calls the script 1 with the two dates creating a range + the prefix URL.
+The prefix URL can be found in the "doc" folder, in columns F of the files.
+It's exactly like the URL when you're on a page with the calendar, except that
+you should remove the final "date.item" or "date.r=".
+However, you MUST keep the final "/" in this URL.
+Like this : https://gallica.bnf.fr/ark:/12148/cb328020951/date18891121
 For example, if you want to download everything between the 1 July of 1893 and
-the 10 July 1893, just do this :
+the 10 July 1893 for the last prefix, just do this :
 
-__python src/1-debats_choose_range.py 1893-07-01 1893-07-10__
+__python src/1-debats_choose_range.py 1893-07-01 1893-07-10 https://gallica.bnf.fr/ark:/12148/cb328020951/date18891121__
 
 - It produces a long list of URLs with dates (without checking if they exist or
 not). Now, use the script 2 to resolve these URLs and obtain the Ark IDs.
