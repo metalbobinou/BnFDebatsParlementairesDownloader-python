@@ -1,0 +1,29 @@
+Collections de documents avec une régularité "quasi" quotidienne :
+
+Journal officiel de la République française. Débats parlementaires. Sénat : compte rendu in-extenso
+https://gallica.bnf.fr/ark:/12148/cb34363182v/date.item
+Dates : 11/01/1881 - 10/07/1940
+
+Journal officiel de la République française. Débats parlementaires. Chambre des députés : compte rendu in-extenso
+https://gallica.bnf.fr/ark:/12148/cb328020951/date.r=
+Dates : 
+- 11/01/1881 - 10/07/1940
+- 09/02/1948 [unique]
+
+Journal officiel de la République française. Lois et décrets
+https://gallica.bnf.fr/ark:/12148/cb34378481r/date.r=
+Dates : 01/01/1881 - 30/09/1940
+
+Journal officiel de la République française (Paris. 1870)
+https://gallica.bnf.fr/ark:/12148/cb328020909/date.item
+Dates : 05/09/1870 - 30/12/1880
+
+Collections avec peu de numéros :
+
+Journal officiel de la République française. Documents parlementaires. Chambre des députés : annexes aux procès-verbaux des séances
+https://gallica.bnf.fr/ark:/12148/cb328020982/date&rk=300430;4
+Dates : 01/01/1881 - 11/07/1939
+
+Table annuelle du Journal officiel de la République française Lois et décrets
+https://gallica.bnf.fr/ark:/12148/cb371291967/date&rk=214593;2
+Dates : 01/01/1871 - 01/01/1940 (j'ai l'impression qu'il y a 2 numéros sur le même jour. Par exemple : https://gallica.bnf.fr/ark:/12148/cb371291967/date19400101#resultat-id-1)
