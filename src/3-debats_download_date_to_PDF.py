@@ -11,34 +11,26 @@ import datetime
 # HTTP & URL
 import urllib.request
 
-#############################################################################
-## The objective of this module is to download all of the JPG of an Ark ID ##
-#############################################################################
+######################################################################
+## The objective of this module is to download the PDF of an Ark ID ##
+######################################################################
 ##
 ## For example, from this Ark ID :
 # ark_id = "/12148/bpt6k6494792j"
-## ...build these URL...
+## ...build this URL...
 # url_short = "https://gallica.bnf.fr/ark:/12148/bpt6k6494792j"
-# url_full = "https://gallica.bnf.fr/ark:/12148/bpt6k6494792j/f1.image/f1.jpeg?download=1"
-## ...and finally downloading the 4 JPG.
+# url_full = "https://gallica.bnf.fr/ark:/12148/bpt6k6494792j/f1.image/f1n4.pdf?download=1"
 ##
 ## !!! WARNING !!!
 ##
-## The first "f" is useless for progressing in the documents !
-## Only the second one is important !!!
-## For getting the page 2, you MUST access :                   v
-##   https://gallica.bnf.fr/ark:/12148/bpt6k6494792j/f1.image/f2.jpeg
-## or :
-##   https://gallica.bnf.fr/ark:/12148/bpt6k6494792j/f2.image/f2.jpeg
-##
-##
-## => In order to stop at the end, the module tries to download one more file
-##    and when an HTTP error is produced, than, no more pictures are available
+## After the fnal "f", the "n" is followed by the number of pages you want.
+## If you put a number bigger than the maxmimum, everything is downloaded.
+## ...let's put 99999 !
 ##
 ##############################################################################
 
 # File containing the last line read
-g_file_last_line_name = "__last_ark_id_downloaded.cache"
+g_file_last_line_name = "__last_ark_id_pdf_downloaded.cache"
 
 # File with unresolved URL
 prefix_undownloaded_file_name = "undownloaded_"
@@ -108,110 +100,101 @@ def prepare_out_directory(directory):
         os.makedirs(directory)
 
 
-### Main JPEG downloader
+### Main PDF downloader
 
-# Download each JPG until an error 503 occurs (when the end of document is reached)
+# Download PDF by asking for the 99999 first pages
 ### identifier = ark_id
 ### directory = directory where to put files
 ### prefix_filename = output file prefix
-def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
+def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_prefix):
     print("#### Processing document " + str(ark_id) +
           " to " + str(directory_output) + "/" + str(filename_prefix))
     print("")
 
     prepare_out_directory(directory_output)
 
-    page_exist = True
-    page = 1
-    while (page_exist):
-        # Try to download a page
-        print("## Downloading page " + str(page) + " (" + ark_id + ")")
+    # Try to download a page
+    print("## Downloading Ark ID [PDF] (" + ark_id + ")")
 
-        # Filename of the JPEG after download
-        jpgfile = filename_prefix + "_" + str(page) + ".jpeg"
+    # Filename of the PDF after download
+    pdffile = filename_prefix + ".pdf"
 
-        # URL of the JPEG to reach for this Ark ID
-        #url = 'http://gallica.bnf.fr/ark:' + ark_id + '/f' + str(page) + '.image/f' + str(page) +'.jpeg?download=1'
-        url_gallica_prefix = 'http://gallica.bnf.fr/ark:'
-        url_ark_id = ark_id
-        url_page = '/f' + str(page) + '.image/f' + str(page) + '.jpeg?download=1'
-        url = url_gallica_prefix + url_ark_id + url_page
+    # URL of the PDF to reach for this Ark ID
+    # https://gallica.bnf.fr/ark:/12148/bpt6k6494792j/f1.image/f1n4.pdf?download=1
+    #url = 'http://gallica.bnf.fr/ark:' + ark_id + '/f1.image/f1n' + '99999' + '.pdf?download=1'
+    url_gallica_prefix = 'http://gallica.bnf.fr/ark:'
+    url_ark_id = ark_id
+    url_page = '/f1.image/f1n' + str(99999) + '.pdf?download=1'
+    url = url_gallica_prefix + url_ark_id + url_page
 
-        # Prepare request
-        req = urllib.request.Request(url)
-        print("trying request...")
-        try:
-            # Send request
-            response = urllib.request.urlopen(req)
+    # Prepare request
+    req = urllib.request.Request(url)
+    print("trying request...")
+    try:
+        # Send request
+        response = urllib.request.urlopen(req)
 
-        # Exception HTTP Error
-        except urllib.error.HTTPError as e:
-            ## Error 503 : we reached the end of the document
-            if (page == 1):
-                print("### HTTP ERROR ON PAGE 1:")
-            else:
-                print("### HTTP ERROR:")
-
-            if hasattr(e, 'reason'):
-                print('Failed to reach a server.')
-                print('Reason: ', e.reason)
-            if hasattr(e, 'code'):
-                print('The server couldn\'t fulfill the request.')
-                print('Error code: ', e.code)
-                ## Error 503 : we reached the end of the document
-                if ((int(e.code) == 503) and (page != 1)):
-                    print("# Stopped at page " + str(page) + " with HTTP 503")
-                    return (None)
-            print("# Stopped at page " + str(page))
-            print("#############")
-            print(e.read())
-            print("#############")
-
-            page_exist = False
-            return (None)
-
-        # Exception URL Error
-        except urllib.error.URLError as e:
-            print("### URL ERROR:")
-            if hasattr(e, 'reason'):
-                print('We failed to reach a server.')
-                print('Reason: ', e.reason)
-            if hasattr(e, 'code'):
-                print('The server couldn\'t fulfill the request.')
-                print('Error code: ', e.code)
-            print("# Stopped at page " + str(page))
-            print("#############")
-            print(e.read())
-            print("#############")
-
-            page_exist = False
-            return (None)
-
-        # Everything is fine
+    # Exception HTTP Error
+    except urllib.error.HTTPError as e:
+        ## Error 503 : we reached the end of the document
+        if (page == 1):
+            print("### HTTP ERROR ON PAGE 1:")
         else:
-            print("OK - p." + str(page))
+            print("### HTTP ERROR:")
 
-            # Get HTTP response
-            data = response.read()
-            info = response.info()
-            url_new = response.url
-            headers = response.headers
-            #text = data.decode(info.get_param('charset', 'utf-8'))
-            #text = data.decode('utf-8')
-            print("## url_new : " + str(url_new))
-            print("## headers : " + str(headers))
+        if hasattr(e, 'reason'):
+            print('Failed to reach a server.')
+            print('Reason: ', e.reason)
+        if hasattr(e, 'code'):
+            print('The server couldn\'t fulfill the request.')
+            print('Error code: ', e.code)
+        print("#############")
+        print(e.read())
+        print("#############")
 
-            # Write out the current file
-            out_file = open(directory_output + "/" + jpgfile, 'wb')
-            out_file.truncate(0)
-            out_file.write(data)
-            out_file.close()
+        page_exist = False
+        return (None)
 
-            print("###################################")
-            page += 1
+    # Exception URL Error
+    except urllib.error.URLError as e:
+        print("### URL ERROR:")
+        if hasattr(e, 'reason'):
+            print('We failed to reach a server.')
+            print('Reason: ', e.reason)
+        if hasattr(e, 'code'):
+            print('The server couldn\'t fulfill the request.')
+            print('Error code: ', e.code)
+        print("#############")
+        print(e.read())
+        print("#############")
+
+        page_exist = False
+        return (None)
+
+    # Everything is fine
+    else:
+        print("OK")
+
+        # Get HTTP response
+        data = response.read()
+        info = response.info()
+        url_new = response.url
+        headers = response.headers
+        #text = data.decode(info.get_param('charset', 'utf-8'))
+        #text = data.decode('utf-8')
+        print("## url_new : " + str(url_new))
+        print("## headers : " + str(headers))
+
+        # Write out the current file
+        out_file = open(directory_output + "/" + pdffile, 'wb')
+        out_file.truncate(0)
+        out_file.write(data)
+        out_file.close()
+
+        print("###################################")
 
     # Let's return the number of pages written
-    return (page)
+    return (1)
 
 
 # For each line, try to download all of the JPEG
@@ -242,13 +225,15 @@ def process_lines(lines):
         ###
 
         ark_id_splitted = split_ark_id(ark_id)
-        dirname = "output_WIP_JPG" + "/" + date + "_" + str(ark_id_splitted[1])
+        ## No need for subfolder in the PDF case
+        #dirname = "output_WIP_PDF" + "/" + date + "_" + str(ark_id_splitted[1])
+        dirname = "output_WIP_PDF" + "/"
         filename_prefix = date + "_" + str(ark_id_splitted[1])
 
         # Ark ID, directory output, filename prefix
-        pages_written = get_document_debat_parlementaire(ark_id,
-                                                         dirname,
-                                                         filename_prefix)
+        pages_written = get_document_PDF_debat_parlementaire(ark_id,
+                                                             dirname,
+                                                             filename_prefix)
 
         ## If an error occurred, let's save where we were
         #if (pages_written == None):
@@ -257,7 +242,7 @@ def process_lines(lines):
         #    update_file_error_log("Ark ID : " + ark_id)
         #    return (-3)
 
-        ## If only one page were written... do something ? [probably unusable]
+        ## If only one page were written... do something ? [unusable in the PDF case]
         #if (pages_written == 1):
         #    update_file_unresolved_log(url)
         #    cur_line += 1
@@ -272,8 +257,8 @@ def process_lines(lines):
     if (os.path.exists(g_file_last_line_name)):
         os.remove(g_file_last_line_name)
     # And let's rename the folder by adding a "_FINAL" inside
-    dirname_final = "output_JPG" + "_" + get_date_and_time()
-    os.rename("output_WIP_JPG",  dirname_final)
+    dirname_final = "output_PDF" + "_" + get_date_and_time()
+    os.rename("output_WIP_PDF",  dirname_final)
 
     return (0)
 
