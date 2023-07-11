@@ -8,7 +8,7 @@ Downloader in python for the BnF collection "Débats Parlementaires" (Parliament
 # Usage:
 1) __1-debats_choose_range.py__ generates a file with a list of URL to test
 2) __2-debats_get_ark_id.py__ tests each URL and generates a file with a list of resolved URL/Ark ID (direct access to each document containing one day of debates)
-3) __3-debats_download_date.py__ downloads all of the pictures of an Ark ID of a debate (it stopsz when there is a 503 error/all pages where consumed)
+3) __3-debats_download_date.py__ downloads all of the pictures of an Ark ID of a debate (it stops when there is a 503 error/all pages where consumed) [a PDF version of the downloader is also available]
 
 # How to Use:
 - Calls the script 1 with the two dates creating a range + the prefix URL.
@@ -50,8 +50,8 @@ there was no debates this day!
 In order to confirm, you can check online on the Gallica website: the log
 contains useful informations like the day AND the day of the week (monday, ...)
 
-- The script 3 produces a juge directory containing subdirectories with all of
-the JPEG downloaded
+- The script 3 produces a directory containing subdirectories with all of the
+downloaded JPEG
 
 - The intermediates files can be read by a human. It is simply a 2 columns file
 The first column contains the date, the second column contains the data
@@ -60,6 +60,14 @@ You can find back which date is associated with each ressource.
 The two columns are separated by a space, because " " character is forbidden in
 regular URL (it should be replaced by a "%20"), therefore it is safe to use it
 as a splitter for data and URLs or ARK IDs.
+
+- The JPEG downloader tries to download JPEG files until an error HTTP 503 is
+produced (telling that the file does not exist/the server failed beacuse it
+cannot send this ressource)
+- The PDF downloader ask for the PDF containing the first 99999 pages (I hope
+that no document from this time had so much pages...). As the ressource does
+not have so much pages, the server sends the maximum pages it could find.
+Therefore, the full PDF is sent.
 
 # Contributors:
 - PUREN Marie (Main Consumer & Projet Leader) [2023-...]
