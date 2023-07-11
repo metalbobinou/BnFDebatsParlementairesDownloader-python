@@ -247,6 +247,7 @@ def process_lines(lines):
             str_unresolved = date + " " + DOTW + " " + url
             update_file_unresolved_log(str_unresolved)
             ###
+            print("#############################################################")
             cur_line += 1
             continue
 

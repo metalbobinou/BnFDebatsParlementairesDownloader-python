@@ -7,8 +7,9 @@ import re
 # Date
 import datetime
 
+## OLD
 # Prefix common to all parliamentary debates
-g_prefix_debates = "https://gallica.bnf.fr/ark:/12148/cb328020951/"
+#g_prefix_debates = "https://gallica.bnf.fr/ark:/12148/cb328020951/"
 
 # Example for debates of 5 february 1889
 #eg_url_targeted = "https://gallica.bnf.fr/ark:/12148/cb328020951/date18890205"
@@ -102,12 +103,17 @@ def write_list_to_file(input_list, filename):
 # Check for arguments in the CLI
 def main():
     # Check for missing arguments
-    if (len(sys.argv) != 3):
+    if (len(sys.argv) != 4):
         print("Missing parameters")
         print("")
-        print("Usage: " + sys.argv[0] + " first_date last_date")
+        print("Usage: " + sys.argv[0] + " first_date last_date URL_prefix")
         print("")
         print("Dates format: YYYY-mm-dd  (e.g.: 1893-07-22)")
+        print("")
+        print("URL prefix format: https://gallica.bnf.fr/ark:/XXXX/YYYY/")
+        print("  (check in the 'doc' folder for the prefix)")
+        print("  DO NOT ADD THE 'date', but keep the final '/' like in this example:")
+        print("  https://gallica.bnf.fr/ark:/12148/cb328020951/")
         return (-1)
     else:
         # Check for incorrect date format in one of the argument
@@ -115,15 +121,21 @@ def main():
             (not (check_date_format(sys.argv[2])))):
             print("Incorrect date format")
             print("")
-            print("Usage: " + sys.argv[0] + " first_date last_date")
+            print("Usage: " + sys.argv[0] + " first_date last_date URL_prefix")
             print("")
             print("Dates format: YYYY-mm-dd  (e.g.: 1893-07-22)")
+            print("")
+            print("URL prefix format: https://gallica.bnf.fr/ark:/XXXX/YYYY/")
+            print("  (check in the 'doc' folder for the prefix)")
+            print("  DO NOT ADD THE 'date', but keep the final '/' like in this example:")
+            print("  https://gallica.bnf.fr/ark:/12148/cb328020951/")
             return (-2)
 
         # If everything is good, let's process data !
         first_date = sys.argv[1]
         last_date = sys.argv[2]
-        prefix_url = g_prefix_debates + "date"
+        #prefix_url = g_prefix_debates + "date"
+        prefix_url = sys.argv[3] + "date"
         suffix_url = ""
 
         # Reverse dates if in incorrect order
