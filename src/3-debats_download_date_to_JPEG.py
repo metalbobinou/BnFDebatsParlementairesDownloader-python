@@ -132,12 +132,15 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
             if hasattr(e, 'reason'):
                 print('We failed to reach a server.')
                 print('Reason: ', e.reason)
-            if hasattr(e, 'code'):
+            if hasattr(e, 'errno'):
                 print('The server couldn\'t fulfill the request.')
-                print('Error code: ', e.code)
+                print('Error code (errno): ', e.errno)
             print("# Stopped at page " + str(page))
             print("#############")
-            print(e.read())
+            if hasattr(e, 'read'):
+                print(e.read())
+            else:
+                print("(no e.read())")
             print("#############")
 
             page_exist = False
@@ -152,10 +155,12 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
             info = response.info()
             url_new = response.url
             headers = response.headers
+            status = response.status
             #text = data.decode(info.get_param('charset', 'utf-8'))
             #text = data.decode('utf-8')
             print("## url_new : " + str(url_new))
             print("## headers : " + str(headers))
+            print("## status  : " + str(status))
 
             # Write out the current file
             out_file = open(directory_output + "/" + jpgfile, 'wb')

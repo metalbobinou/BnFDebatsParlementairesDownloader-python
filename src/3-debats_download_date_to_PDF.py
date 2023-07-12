@@ -121,7 +121,10 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
             print('The server couldn\'t fulfill the request.')
             print('Error code: ', e.code)
         print("#############")
-        print(e.read())
+        if hasattr(e, 'read'):
+            print(e.read())
+        else:
+            print("(no e.read())")
         print("#############")
 
         page_exist = False
@@ -136,10 +139,12 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
         info = response.info()
         url_new = response.url
         headers = response.headers
+        status = response.status
         #text = data.decode(info.get_param('charset', 'utf-8'))
         #text = data.decode('utf-8')
         print("## url_new : " + str(url_new))
         print("## headers : " + str(headers))
+        print("## status  : " + str(status))
 
         # Write out the current file
         out_file = open(directory_output + "/" + pdffile, 'wb')

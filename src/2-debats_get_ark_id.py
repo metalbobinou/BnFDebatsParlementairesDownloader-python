@@ -101,11 +101,14 @@ def get_ressource_url(url):
         if hasattr(e, 'reason'):
             print('We failed to reach a server.')
             print('Reason: ', e.reason)
-        if hasattr(e, 'code'):
+        if hasattr(e, 'errno'):
             print('The server couldn\'t fulfill the request.')
-            print('Error code: ', e.code)
+            print('Error code (errno): ', e.errno)
         print("#############")
-        print(e.read())
+        if hasattr(e, 'read'):
+            print(e.read())
+        else:
+            print("(no e.read())")
         print("#############")
         return (None)
 
@@ -116,10 +119,12 @@ def get_ressource_url(url):
         data = response.read()
         url_new = response.url
         headers = response.headers
+        status = response.status
         #text = data.decode(info.get_param('charset', 'utf-8'))
 
         print("## url_new : " + str(url_new))
         print("## headers : " + str(headers))
+        print("## status  : " + str(status))
         #with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         #    shutil.copyfileobj(response, tmp_file)
         #shutil.copy(tmp_file.name, "html.txt")
@@ -194,7 +199,7 @@ def process_lines(lines):
         ark_id = get_ark_id_from_date_URL(url)
         # if ark_id was not found, write down the number where it failed and stop
         if (ark_id == None):
-            update_file_last_line(cur_line, g_file_last_line_name)
+            MyCommonTools.update_file_last_line(cur_line, g_file_last_line_name)
             print("ERROR: Failed at line " + str(cur_line))
             print("DATE : " + date)
             print("URL : " + url)
@@ -227,9 +232,12 @@ def process_lines(lines):
     if (os.path.exists(g_file_last_line_name)):
         os.remove(g_file_last_line_name)
     # And let's rename the final resolved list by adding a "_FINAL" inside
-    url_resolved_filename_final = os.path.splitext(url_resolved_filename_output)[0]
-    url_resolved_filename_final = url_resolved_filename_final + "_final.txt"
-    os.rename(url_resolved_filename_output, url_resolved_filename_final)
+    if (os.path.exists(url_resolved_filename_output)):
+        url_resolved_filename_final = os.path.splitext(url_resolved_filename_output)[0]
+        url_resolved_filename_final = url_resolved_filename_final + "_final.txt"
+        os.rename(url_resolved_filename_output, url_resolved_filename_final)
+    else:
+        print("--no file were created during this script--")
 
     return (0)
 

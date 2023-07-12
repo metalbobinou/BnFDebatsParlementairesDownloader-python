@@ -1,6 +1,24 @@
 # Highly Required :
-HR2 - create another 3rd script that downloads PDF only
 HR3 - check the logs and errors
+HR4 - modify script 2 for resolving multiple Ark ID behind one date
+
+Example:
+https://gallica.bnf.fr/ark:/12148/cb371291967/date.item
+https://gallica.bnf.fr/ark:/12148/cb371291967/date1940
+https://gallica.bnf.fr/ark:/12148/cb371291967/date19400101
+=>
+https://gallica.bnf.fr/ark:/12148/bpt6k9702712r?rk=21459;2
+https://gallica.bnf.fr/ark:/12148/bpt6k2095638x?rk=42918;4
+=>
+https://gallica.bnf.fr/ark:/12148/bpt6k9702712r
+https://gallica.bnf.fr/ark:/12148/bpt6k2095638x
+
+Instead of :
+https://gallica.bnf.fr/ark:/12148/cb328020951/date.item
+https://gallica.bnf.fr/ark:/12148/cb328020951/date1893
+https://gallica.bnf.fr/ark:/12148/cb328020951/date18930201
+=>
+https://gallica.bnf.fr/ark:/12148/bpt6k64285087.item
 
 # Why not :
 WN1 - create another 3rd script that downloads TXT only
@@ -8,3 +26,4 @@ WN1 - create another 3rd script that downloads TXT only
 
 # -- DONE --
 HR1 - put a date in front of the Ark ID for better management of the dates
+HR2 - create another 3rd script that downloads PDF only

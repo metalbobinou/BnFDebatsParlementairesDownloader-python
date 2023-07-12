@@ -41,7 +41,7 @@ def get_day_or_the_week(date):
 ### File tools
 
 # Update the file recording last line processed
-def update_file_last_line(cur_line, file_last_line):
+def update_file_last_line(cur_line, file_last_line_name):
     fd = open(file_last_line_name, 'w')
     fd.truncate(0)
     fd.write(str(cur_line))
