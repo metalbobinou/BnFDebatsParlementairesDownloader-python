@@ -11,6 +11,9 @@ import datetime
 # HTTP & URL
 import urllib.request
 
+### Contains small tools for dates and others
+import MyCommonTools
+
 #############################################################################
 ## The objective of this module is to download all of the JPG of an Ark ID ##
 #############################################################################
@@ -45,33 +48,6 @@ prefix_undownloaded_file_name = "undownloaded_"
 
 ### Small tools
 
-# Generate a string with the date and time
-def get_date_and_time():
-    now = datetime.datetime.now()
-    str_time = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
-    return (str_time)
-# Generate a string with the date
-def get_date():
-    now = datetime.datetime.now()
-    str_time = now.strftime("%Y-%m-%d")
-    return (str_time)
-# Generate a string with the time
-def get_time():
-    now = datetime.datetime.now()
-    str_time = now.strftime("%Hh%Mm%Ss")
-    return (str_time)
-
-# Get the day of the week from a date in str (YYYY-MM-DD)
-def get_day_or_the_week(date):
-    datetime_object = datetime.datetime.strptime(date, "%Y-%m-%d")
-    # weekday() : Monday = 0 ... Sunday = 6
-    int_DOTW = datetime_object.weekday()
-    # isoweekday() : Monday = 1 ... Sunday = 7
-    iso_DOTW = datetime_object.isoweekday()
-    # named day of the week
-    DOTW = datetime_object.strftime('%A')
-    return (DOTW)
-
 # Split the Ark ID into a list
 def split_ark_id(ark_id):
     # Ark ID : /12148/bpt6k6449020t
@@ -81,31 +57,11 @@ def split_ark_id(ark_id):
     split = re.split("/", ark_id)
     return (split[1:len(split)])
 
-# Update the cache recording last line processed
-def update_file_last_line(cur_line):
-    fd = open(g_file_last_line_name, 'w')
-    fd.truncate(0)
-    fd.write(str(cur_line))
-    fd.close()
-
 # Add a URL to the undownloaded log
 def update_file_undownloaded_log(msg):
-    undownloaded_filename = prefix_undownloaded_file_name + sys.argv[1]
-    fd = open(undownloaded_filename, 'a')
-    fd.write(str(msg) + "\n")
-    fd.close()
-
-# Add a line in a file
-def update_file_ouput(url_resolved, filename_output):
-    fd = open(filename_output, 'a')
-    fd.write(str(url_resolved) + "\n")
-    fd.close()
-
-# Create a directory if it does not exist
-def prepare_out_directory(directory):
-    isExist = os.path.exists(directory)
-    if not isExist:
-        os.makedirs(directory)
+    ark_id_filename_input = sys.argv[1]
+    undownloaded_filename = prefix_undownloaded_file_name + ark_id_filename_input
+    MyCommonTools.update_file_ouput(msg, undownloaded_filename)
 
 
 ### Main JPEG downloader
@@ -119,7 +75,7 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
           " to " + str(directory_output) + "/" + str(filename_prefix))
     print("")
 
-    prepare_out_directory(directory_output)
+    MyCommonTools.prepare_out_directory(directory_output)
 
     page_exist = True
     page = 1
@@ -252,7 +208,7 @@ def process_lines(lines):
 
         ## If an error occurred, let's save where we were
         #if (pages_written == None):
-        #    update_file_last_line(cur_line)
+        #    update_file_last_line(cur_line, g_file_last_line_name)
         #    update_file_error_log("Failed at line " + str(cur_line))
         #    update_file_error_log("Ark ID : " + ark_id)
         #    return (-3)
@@ -272,7 +228,7 @@ def process_lines(lines):
     if (os.path.exists(g_file_last_line_name)):
         os.remove(g_file_last_line_name)
     # And let's rename the folder by adding a "_FINAL" inside
-    dirname_final = "output_JPG" + "_" + get_date_and_time()
+    dirname_final = "output_JPG" + "_" + MyCommonTools.get_date_and_time()
     os.rename("output_WIP_JPG",  dirname_final)
 
     return (0)

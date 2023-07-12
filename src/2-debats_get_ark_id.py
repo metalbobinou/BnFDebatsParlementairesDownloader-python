@@ -11,6 +11,9 @@ import datetime
 # HTTP & URL
 import urllib.request
 
+### Contains small tools for dates and others
+import MyCommonTools
+
 ##############################################################################
 ## The objective of this module is to resolve a date URL and get the Ark ID ##
 ##############################################################################
@@ -32,53 +35,11 @@ prefix_unresolved_file_name = "unresolved_"
 
 ### Small tools
 
-# Generate a string with the date and time
-def get_date_and_time():
-    now = datetime.datetime.now()
-    str_time = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
-    return (str_time)
-# Generate a string with the date
-def get_date():
-    now = datetime.datetime.now()
-    str_time = now.strftime("%Y-%m-%d")
-    return (str_time)
-# Generate a string with the time
-def get_time():
-    now = datetime.datetime.now()
-    str_time = now.strftime("%Hh%Mm%Ss")
-    return (str_time)
-
-# Get the day of the week from a date in str (YYYY-MM-DD)
-def get_day_or_the_week(date):
-    datetime_object = datetime.datetime.strptime(date, "%Y-%m-%d")
-    # weekday() : Monday = 0 ... Sunday = 6
-    int_DOTW = datetime_object.weekday()
-    # isoweekday() : Monday = 1 ... Sunday = 7
-    iso_DOTW = datetime_object.isoweekday()
-    # named day of the week
-    DOTW = datetime_object.strftime('%A')
-    return (DOTW)
-
-# Update the cache recording last line processed
-def update_file_last_line(cur_line):
-    fd = open(g_file_last_line_name, 'w')
-    fd.truncate(0)
-    fd.write(str(cur_line))
-    fd.close()
-
 # Add a URL to the unresolved log
 def update_file_unresolved_log(msg):
     url_filename_input = sys.argv[1]
     unresolved_filename = prefix_unresolved_file_name + url_filename_input
-    fd = open(unresolved_filename, 'a')
-    fd.write(str(msg) + "\n")
-    fd.close()
-
-# Add a line in a file
-def update_file_ouput(line, filename_output):
-    fd = open(filename_output, 'a')
-    fd.write(str(line) + "\n")
-    fd.close()
+    MyCommonTools.update_file_ouput(msg, unresolved_filename)
 
 # Remove the ".item" suffix if it exists
 def remove_suffix_item_from_url(url):
@@ -218,7 +179,7 @@ def process_lines(lines):
     ## Update the unresolved log for saying an instance has been launched
     now = datetime.datetime.now()
     update_file_unresolved_log("# Launching URL resolver for debates at " +
-                                   now.strftime("%d/%m/%Y %H:%M:%S"))
+                               now.strftime("%d/%m/%Y %H:%M:%S"))
 
     # Continue the process of the file from the last state
     url_resolved_filename_output = "resolved_" + url_filename_input
@@ -233,17 +194,17 @@ def process_lines(lines):
         ark_id = get_ark_id_from_date_URL(url)
         # if ark_id was not found, write down the number where it failed and stop
         if (ark_id == None):
-            update_file_last_line(cur_line)
-            update_file_error_log("Failed at line " + str(cur_line))
-            update_file_error_log("DATE : " + date)
-            update_file_error_log("URL : " + url)
+            update_file_last_line(cur_line, g_file_last_line_name)
+            print("ERROR: Failed at line " + str(cur_line))
+            print("DATE : " + date)
+            print("URL : " + url)
             return (-3)
 
         # if URL hasn't changed, let's skip it (add write it in the unresolved log)
         if (ark_id == url):
             #update_file_unresolved_log(url)
             ### Add day and name of the day in the log
-            DOTW = get_day_or_the_week(date)
+            DOTW = MyCommonTools.get_day_or_the_week(date)
             str_unresolved = date + " " + DOTW + " " + url
             update_file_unresolved_log(str_unresolved)
             ###
@@ -256,7 +217,7 @@ def process_lines(lines):
         ### Add date before Ark_ID
         # out format : "YYYY-MM-DD Ark_ID"
         str_out = date + " " + ark_id
-        update_file_ouput(str_out, url_resolved_filename_output)
+        MyCommonTools.update_file_ouput(str_out, url_resolved_filename_output)
         ###
         print("#############################################################")
         # read next line
