@@ -114,7 +114,7 @@ def main():
         print("  (check in the 'doc' folder for the prefix)")
         print("  DO NOT ADD THE 'date', but keep the final '/' like in this example:")
         print("  https://gallica.bnf.fr/ark:/12148/cb328020951/")
-        return (-1)
+        exit(-1)
     else:
         # Check for incorrect date format in one of the argument
         if ((not (check_date_format(sys.argv[1]))) or
@@ -129,7 +129,7 @@ def main():
             print("  (check in the 'doc' folder for the prefix)")
             print("  DO NOT ADD THE 'date', but keep the final '/' like in this example:")
             print("  https://gallica.bnf.fr/ark:/12148/cb328020951/")
-            return (-2)
+            exit(-2)
 
         # If everything is good, let's process data !
         first_date = sys.argv[1]

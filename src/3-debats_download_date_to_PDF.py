@@ -234,7 +234,7 @@ def main():
         print("File list_of_Ark_IDs format: [one Ark ID per line]")
         print("[date] [Ark ID]")
         print("date : YYYY-MM-DD     Ark ID : /12148/bpt6k64490143")
-        return (-1)
+        exit(-1)
     else:
         ark_id_filename_input = sys.argv[1]
         # Check if file is readable
@@ -256,13 +256,13 @@ def main():
             print("File list_of_Ark_IDs format: [one Ark ID per line]")
             print("[date] [Ark ID]")
             print("date : YYYY-MM-DD     Ark ID : /12148/bpt6k64490143")
-            return (-2)
+            exit(-2)
 
 
         # In other case, when evrything is fine, let's process lines
         ret = process_lines(lines)
 
-        return (ret)
+        exit(ret)
 
 main()
 
