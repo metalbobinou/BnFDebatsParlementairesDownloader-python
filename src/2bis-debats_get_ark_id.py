@@ -11,6 +11,11 @@ import datetime
 # HTTP & URL
 import urllib.request
 
+# HTML Parser
+#import BeautifulSoup
+#from bs4 import BeautifulSoup
+import bs4
+
 ### Contains small tools for dates and others
 import MyCommonTools
 
@@ -118,9 +123,11 @@ def get_ressource_url(url):
     else:
         print("OK")
 
-        data = response.read()
-        content = str(data.decode('utf-8'))
+        #data = response.read()
+        #content = str(data.decode('utf-8'))
         #text = data.decode(info.get_param('charset', 'utf-8'))
+        html = response.read().decode(response.info().get_param('charset') or 'utf-8')
+        info = response.info()
         url_new = response.url
         headers = response.headers
         status = response.status
@@ -133,6 +140,26 @@ def get_ressource_url(url):
         #f.write(content)
         #f.close()
         #g_i += 1
+        #f = open("html.htm", "w")
+        #f.write(html)
+        #f.close()
+
+        ## Cleaning response
+        ## Ignore the firsts XML header : (one of them is usually sent by server...)
+        ## <--!?xml version="1.0" encoding="utf-8" ?-->
+        ## <?xml version="1.0" encoding="utf-8" ?>
+
+        ## XML interpretation
+        #soup = bs4.BeautifulSoup(html, features="lxml-xml")
+        ## HTML interpretation
+        soup = bs4.BeautifulSoup(html, features="lxml")
+        ListeResultats = soup.find("div", {"class" : "liste-resultats"})
+        print(ListeResultats)
+        ## tester s'il s'y a un "ListeResultats"... si oui, utiliser "selenium" pour
+        ##  effectuer les events JS qui font derouler la liste resultat........
+        ##  Et chercher dedans chaque "resultat-id-X" (ou X est un nombre de 1 a N)
+        ItemsContainer = soup.find("div", {"class": "itemsContainer"})
+        print(ItemsContainer)
 
         return (url_new)
 
