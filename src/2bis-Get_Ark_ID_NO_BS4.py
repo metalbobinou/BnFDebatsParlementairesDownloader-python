@@ -30,6 +30,9 @@ import MyCommonTools
 # File containing the last line read
 g_file_last_line_name = "__last_url_resolved.cache"
 
+# File with resolved URL / Date has one document
+prefix_resolved_file_name = "resolved_"
+
 # File with unresolved URL
 prefix_unresolved_file_name = "unresolved_"
 
@@ -187,7 +190,7 @@ def process_lines(lines):
                                now.strftime("%d/%m/%Y %H:%M:%S"))
 
     # Continue the process of the file from the last state
-    url_resolved_filename_output = "resolved_" + url_filename_input
+    url_resolved_filename = prefix_resolved_file_name + url_filename_input
     while (cur_line != max_line):
         #url = lines[cur_line]
         ### Manages file with 2 columns
@@ -210,8 +213,8 @@ def process_lines(lines):
             #update_file_unresolved_log(url)
             ### Add day and name of the day in the log
             DOTW = MyCommonTools.get_day_or_the_week(date)
-            str_unresolved = date + " " + DOTW + " " + url
-            update_file_unresolved_log(str_unresolved)
+            line_unresolved = date + " " + DOTW + " " + url
+            update_file_unresolved_log(line_unresolved)
             ###
             print("#############################################################")
             cur_line += 1
@@ -221,8 +224,8 @@ def process_lines(lines):
         #update_file_ouput(ark_id, url_resolved_filename_output)
         ### Add date before Ark_ID
         # out format : "YYYY-MM-DD Ark_ID"
-        str_out = date + " " + ark_id
-        MyCommonTools.update_file_ouput(str_out, url_resolved_filename_output)
+        line_resolved = date + " " + ark_id
+        MyCommonTools.update_file_ouput(line_resolved, url_resolved_filename)
         ###
         print("#############################################################")
         # read next line
@@ -232,10 +235,10 @@ def process_lines(lines):
     if (os.path.exists(g_file_last_line_name)):
         os.remove(g_file_last_line_name)
     # And let's rename the final resolved list by adding a "_FINAL" inside
-    if (os.path.exists(url_resolved_filename_output)):
-        url_resolved_filename_final = os.path.splitext(url_resolved_filename_output)[0]
+    if (os.path.exists(url_resolved_filename)):
+        url_resolved_filename_final = os.path.splitext(url_resolved_filename)[0]
         url_resolved_filename_final = url_resolved_filename_final + "_final.txt"
-        os.rename(url_resolved_filename_output, url_resolved_filename_final)
+        os.rename(url_resolved_filename, url_resolved_filename_final)
     else:
         print("--no file were created during this script--")
 
