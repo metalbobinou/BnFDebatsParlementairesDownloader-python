@@ -239,7 +239,7 @@ def process_lines(lines):
 
     ## Update the unresolved log for saying an instance has been launched
     now = datetime.datetime.now()
-    update_file_unresolved_log("# Launching URL resolver for debates at " +
+    update_file_unresolved_log("# Launching URL resolver/Ark ID solver at " +
                                now.strftime("%d/%m/%Y %H:%M:%S"))
 
     # Continue the process of the file from the last state
