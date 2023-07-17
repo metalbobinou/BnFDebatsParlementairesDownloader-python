@@ -35,22 +35,31 @@ import MyCommonTools
 # File containing the last line read
 g_file_last_line_name = "__last_url_resolved.cache"
 
-# File with unresolved URL
+# File with unresolved URL / Date has no document
 prefix_unresolved_file_name = "unresolved_"
+
+# File with complex URL / Date has multiple documents
+prefix_complex_file_name = "complex_"
 
 ### Small tools
 
-# Add a URL to the unresolved log
+# Add a URL to the unresolved log / Date has no document
 def update_file_unresolved_log(msg):
     url_filename_input = sys.argv[1]
     unresolved_filename = prefix_unresolved_file_name + url_filename_input
     MyCommonTools.update_file_ouput(msg, unresolved_filename)
 
+# Add a URL to the complex-resolve log / Date has multiple documents
+def update_file_complex_log(msg):
+    url_filename_input = sys.argv[1]
+    complex_filename = prefix_complex_file_name + url_filename_input
+    MyCommonTools.update_file_ouput(msg, complex_filename)
+
 # Remove the ".item" suffix if it exists
 def remove_suffix_item_from_url(url):
     match = re.search('\.item$', url)
     # if no ".item" found, let's send back the URL
-    if (match == None):
+    if (match is None):
         return (url)
 
     # if ".item" found, let's remove it
@@ -65,7 +74,7 @@ def remove_suffix_item_from_url(url):
 def remove_prefix_https_from_url(url):
     match = re.search('^https?://gallica\.bnf\.fr/ark:', url)
     # if no prefix found, let's send back the URL
-    if (match == None):
+    if (match is None):
         return (None)
 
     # if prefix is found, let's keep only the ark id following it
@@ -76,6 +85,7 @@ def remove_prefix_https_from_url(url):
 ### Main URL resolver
 
 # Send a GET request with a date URL, and obtain the resolved one as answer
+#    + check for "liste-resultats" class (in case of multiple docs on the same date)
 def get_ressource_url(url):
     print("## Getting new URL for : " + str(url))
 
@@ -98,7 +108,7 @@ def get_ressource_url(url):
         print("#############")
         print(e.read())
         print("#############")
-        return (None)
+        return (None, None)
 
     # Exception URL Error
     except urllib.error.URLError as e:
@@ -117,7 +127,7 @@ def get_ressource_url(url):
         else:
             print("(no e.read())")
         print("#############")
-        return (None)
+        return (None, None)
 
     # Everything is fine
     else:
@@ -133,7 +143,7 @@ def get_ressource_url(url):
         status = response.status
 
         print("## url_new : " + str(url_new))
-        print("## headers : " + str(headers))
+        #print("## headers : " + str(headers))
         print("## status  : " + str(status))
         #global g_i
         #f = open("html" + str(g_i) + ".txt", "w")
@@ -144,60 +154,71 @@ def get_ressource_url(url):
         #f.write(html)
         #f.close()
 
-        ## Cleaning response
-        ## Ignore the firsts XML header : (one of them is usually sent by server...)
-        ## <--!?xml version="1.0" encoding="utf-8" ?-->
-        ## <?xml version="1.0" encoding="utf-8" ?>
+        ### Check if there is a "liste-resultats" class...
+        ###  ...because if there is one, then there are multiple documents for one date
+        if (url_new == url):
+            ## Cleaning response
+            ## Ignore the firsts XML header : (one of them is usually sent by server...)
+            ## <--!?xml version="1.0" encoding="utf-8" ?-->
+            ## <?xml version="1.0" encoding="utf-8" ?>
 
-        ## XML interpretation
-        #soup = bs4.BeautifulSoup(html, features="lxml-xml")
-        ## HTML interpretation
-        soup = bs4.BeautifulSoup(html, features="lxml")
-        ListeResultats = soup.find("div", {"class" : "liste-resultats"})
-        print(ListeResultats)
-        ## tester s'il s'y a un "ListeResultats"... si oui, utiliser "selenium" pour
-        ##  effectuer les events JS qui font derouler la liste resultat........
-        ##  Et chercher dedans chaque "resultat-id-X" (ou X est un nombre de 1 a N)
-        ItemsContainer = soup.find("div", {"class": "itemsContainer"})
-        print(ItemsContainer)
+            ## XML interpretation
+            #soup = bs4.BeautifulSoup(html, features="lxml-xml")
+            ## HTML interpretation
+            soup = bs4.BeautifulSoup(html, features="lxml")
+            ListeResultats = soup.find("div", {"class" : "liste-resultats"})
+            #print(ListeResultats)
+            if (not (ListeResultats is None)):
+                return (url_new, True)
 
-        return (url_new)
+            ## tester s'il s'y a un "ListeResultats"... si oui, utiliser "selenium" pour
+            ##  effectuer les events JS qui font derouler la liste resultat........
+            ##  Et chercher dedans chaque "resultat-id-X" (ou X est un nombre de 1 a N)
+            #ItemsContainer = soup.find("div", {"class": "itemsContainer"})
+            #print(ItemsContainer)
+
+        return (url_new, False)
 
 
-# Resolve a URL and extract its Ark ID
+# Resolve a URL and extract its Ark ID + inform if a "liste-resultats" was found or not
 def get_ark_id_from_date_URL(url_date):
     # Let's resolve date URL and obtain the new URL
-    url_resolved = get_ressource_url(url_date)
+    #url_resolved = get_ressource_url(url_date)
+    answers = get_ressource_url(url_date)
+    url_resolved = answers[0]
+    liste_resultats = answers[1]
+
     # if resolved URL is empty, let's write it
-    if (url_resolved == None):
+    if (url_resolved is None):
         print("## Error :")
-        print("  no ressource found")
-        print("url_date : --" + url_date + "--")
-        return (None)
+        print("  No ressource found")
+        print("    url_date : --" + url_date + "--")
+        return (answers)
 
     # if URL hasn't changed, let's return it and write an error...
     if (url_resolved == url_date):
         print("## Warning :")
-        print("  URL hasn't changed. Let's skip it...")
-        print("url_date : --" + url_date + "--")
-        return (url_date)
+        print("  URL hasn't changed")
+        print("    url_date : --" + url_date + "--")
+        print("    liste_resultats : --" + str(liste_resultats) + "--")
+        return (answers)
 
     # if the date has been resolved;, let's parse it for Ark ID
     ## first, let's remove the suffix if it exists : the final ".item"
     url_no_suffix = remove_suffix_item_from_url(url_resolved)
     ## next, let's remove the prefix : the http[s]://...
     ark_id = remove_prefix_https_from_url(url_no_suffix)
-    if (ark_id == None):
+    if (ark_id is None):
         print("## Error :")
-        print("  can't find the Ark ID in the URL")
-        print("url_date : --" + url_date + "--")
-        print("url_resolved : --" + url_resolved + "--")
-        print("url_no_suffix : --" + url_no_suffix + "--")
+        print("  Can't find the Ark ID in the URL")
+        print("    url_date : --" + url_date + "--")
+        print("    url_resolved : --" + url_resolved + "--")
+        print("    url_no_suffix : --" + url_no_suffix + "--")
 
-        return (None)
+        return (answers)
 
     # Ark ID has been found
-    return (ark_id)
+    return (ark_id, False)
 
 # For each line, try to resolve it, or write in unresolved logs that it failed
 def process_lines(lines):
@@ -228,9 +249,13 @@ def process_lines(lines):
         date = line_split[0]
         url = line_split[1]
         ###
-        ark_id = get_ark_id_from_date_URL(url)
+        #ark_id = get_ark_id_from_date_URL(url)
+        answers = get_ark_id_from_date_URL(url)
+        ark_id = answers[0]
+        found_liste_resultats_class = answers[1]
+
         # if ark_id was not found, write down the number where it failed and stop
-        if (ark_id == None):
+        if (ark_id is None):
             MyCommonTools.update_file_last_line(cur_line, g_file_last_line_name)
             print("ERROR: Failed at line " + str(cur_line))
             print("DATE : " + date)
@@ -238,12 +263,19 @@ def process_lines(lines):
             return (-3)
 
         # if URL hasn't changed, let's skip it (add write it in the unresolved log)
+        #   however, if there was a "liste-resultats" class, then there are multiple docs...
+        #   and let's write it in a special log
         if (ark_id == url):
-            #update_file_unresolved_log(url)
-            ### Add day and name of the day in the log
-            DOTW = MyCommonTools.get_day_or_the_week(date)
-            str_unresolved = date + " " + DOTW + " " + url
-            update_file_unresolved_log(str_unresolved)
+            if (found_liste_resultats_class == False):
+                #update_file_unresolved_log(url)
+                ### Add day and name of the day in the log
+                DOTW = MyCommonTools.get_day_or_the_week(date)
+                str_unresolved = date + " " + DOTW + " " + url
+                update_file_unresolved_log(str_unresolved)
+                print("=> No document found")
+            else:
+                update_file_complex_log(url)
+                print("=> Multiple documents found")
             ###
             print("#############################################################")
             cur_line += 1
@@ -255,6 +287,7 @@ def process_lines(lines):
         # out format : "YYYY-MM-DD Ark_ID"
         str_out = date + " " + ark_id
         MyCommonTools.update_file_ouput(str_out, url_resolved_filename_output)
+        print("=> One document found")
         ###
         print("#############################################################")
         # read next line
