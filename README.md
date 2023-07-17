@@ -4,6 +4,7 @@ Downloader in python for the BnF collection "Débats Parlementaires" (Parliament
 # Requirements:
 - Python 3+
 - urllib.request
+- Beautiful Soup 4
 
 # Usage:
 1) __1-debats_choose_range.py__ generates a file with a list of URL to test
