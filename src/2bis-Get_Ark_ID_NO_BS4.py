@@ -40,7 +40,7 @@ prefix_unresolved_file_name = "unresolved_"
 
 # Add a URL to the unresolved log
 def update_file_unresolved_log(msg):
-    url_filename_input = sys.argv[1]
+    url_filename_input = os.path.basename(sys.argv[1])
     unresolved_filename = prefix_unresolved_file_name + url_filename_input
     MyCommonTools.update_file_ouput(msg, unresolved_filename)
 
@@ -172,7 +172,7 @@ def get_ark_id_from_date_URL(url_date):
 
 # For each line, try to resolve it, or write in unresolved logs that it failed
 def process_lines(lines):
-    url_filename_input = sys.argv[1]
+    url_filename_input = os.path.basename(sys.argv[1])
 
     # File has been read and is in memory, everything is fine
     cur_line = 0
@@ -286,19 +286,3 @@ def main():
         exit(ret)
 
 main()
-
-
-# MAIN OF TEST
-def main_debats_get_ark_id():
-    url_id1 = "/12148/cb328020951/date18891112"
-    url_id2 = "/12148/bpt6k6494792j/"
-
-    url_id1 = "https://gallica.bnf.fr/ark:/12148/cb328020951/date18891112"
-    url_id2 = "https://gallica.bnf.fr/ark:/12148/bpt6k6494792j.item"
-
-    url_id = url_id1
-    new_url = get_ark_id_from_date_URL(url_id)
-
-    print("Old URL : " + url_id1)
-    print("New URL : " + new_url)
-    print("Expect  : " + url_id2)

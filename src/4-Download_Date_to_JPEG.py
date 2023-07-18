@@ -59,7 +59,7 @@ def split_ark_id(ark_id):
 
 # Add a URL to the undownloaded log
 def update_file_undownloaded_log(msg):
-    ark_id_filename_input = sys.argv[2]
+    ark_id_filename_input = os.path.basename(sys.argv[2])
     undownloaded_filename = prefix_undownloaded_file_name + ark_id_filename_input
     MyCommonTools.update_file_ouput(msg, undownloaded_filename)
 

@@ -95,7 +95,7 @@ def extract_ark_id_from_url(url):
 
 # Add a URL to the unresolved log
 def update_file_unresolved_log(msg):
-    ark_id_filename_input = sys.argv[1]
+    ark_id_filename_input = os.path.basename(sys.argv[1])
     unresolved_filename = prefix_unresolved_file_name + ark_id_filename_input
     MyCommonTools.update_file_ouput(msg, unresolved_filename)
 
@@ -169,7 +169,7 @@ def get_web_page(url):
 
 # For each line, get the web page and process each result-id
 def process_lines(lines):
-    url_filename_input = sys.argv[1]
+    url_filename_input = os.path.basename(sys.argv[1])
 
     # File has been read and is in memory, everything is fine
     cur_line = 0

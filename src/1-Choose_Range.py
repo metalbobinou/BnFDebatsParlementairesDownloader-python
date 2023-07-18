@@ -152,28 +152,3 @@ def main():
         return (0)
 
 main()
-
-# MAIN OF TEST
-def main_test():
-    first_date = "1889-11-12"
-    last_date = "1893-07-22"
-    #last_date = "1893-10-14"
-
-    url_targeted = "https://gallica.bnf.fr/ark:/12148/cb328020951/date18890205"
-    prefix_debates = "https://gallica.bnf.fr/ark:/12148/cb328020951/"
-    prefix_date = "date"
-    suffix_date = ""
-
-    list_of_dates = generate_list_of_dates(first_date, last_date)
-
-    #print(list_of_dates)
-
-    list_of_url = generate_list_of_URL(first_date,
-                                       last_date,
-                                       prefix_debates + "date",
-                                       "")
-
-    #print(list_of_url)
-
-    filename = "list_url_" + first_date + "_"  + last_date
-    write_list_to_file(list_of_url, filename)
