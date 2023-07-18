@@ -1,6 +1,7 @@
 # Files
 import sys
 import os
+from io import StringIO, BytesIO
 
 # Regexp
 import re
@@ -10,6 +11,9 @@ import datetime
 
 # HTTP & URL
 import urllib.request
+
+# Beautiful Soup
+from bs4 import BeautifulSoup
 
 # Selenium [web browser for JS in code]
 from selenium import webdriver
@@ -61,14 +65,46 @@ prefix_unresolved_file_name = "double-unresolved_"
 
 ### Small tools
 
-# Split the Ark ID into a list
-def split_ark_id(ark_id):
-    # Ark ID : /12148/bpt6k6449020t
-    #match = re.match("/([a-aA-Z_0-9]*)", ark_id)
-    #return (match.groups())
-    # Spli the string by the '/' and remove the empty 1st
-    split = re.split("/", ark_id)
-    return (split[1:len(split)])
+# Remove the "?" suffix if it exists
+def remove_suffix_question_from_url(url):
+    match = re.search('\?.*$', url)
+    # if no "?" found, let's send back the URL
+    if (match == None):
+        return (url)
+
+    # if "?" found, let's remove it
+    no_question_url = url[:match.start(0)]
+    return (no_question_url)
+
+# Remove the ".item" suffix if it exists
+def remove_suffix_item_from_url(url):
+    match = re.search('\.item$', url)
+    # if no ".item" found, let's send back the URL
+    if (match == None):
+        return (url)
+
+    # if ".item" found, let's remove it
+    no_item_url = url[:match.start(0)]
+    return (no_item_url)
+
+# Remove the http[s]://gallica.bnf.fr/ark: prefix in a URL
+def remove_prefix_https_from_url(url):
+    match = re.search('^https?://gallica\.bnf\.fr/ark:', url)
+    # if no prefix found, let's send back the URL
+    if (match == None):
+        return (None)
+
+    # if prefix is found, let's keep only the ark id following it
+    ark_id = url[match.end(0):]
+    return (ark_id)
+
+# Extract the Ark ID from a URL
+def extract_ark_id_from_url(url):
+    url_no_question = remove_suffix_question_from_url(url)
+    url_no_suffix = remove_suffix_item_from_url(url_no_question)
+    url_cleaned = remove_prefix_https_from_url(url_no_suffix)
+    return (url_cleaned)
+
 
 # Add a URL to the unresolved log
 def update_file_unresolved_log(msg):
@@ -79,6 +115,7 @@ def update_file_unresolved_log(msg):
 
 # Get the web page
 def get_web_page(url):
+    links = []
     print("## Checking URL : " + str(url))
     ## Chromium & Force size 1
     #options = Options()
@@ -92,6 +129,12 @@ def get_web_page(url):
 
     ## Open the webpage
     driver.get(url)
+    ## Save the full page
+    f = open("file.htm", "w")
+    html = driver.page_source
+    f.write(html)
+    f.close
+
     ## Goto the results list : <div class="liste-resultats">
     div_liste_resultats = driver.find_element(By.CLASS_NAME, "liste-resultats")
 
@@ -101,33 +144,41 @@ def get_web_page(url):
     liste_id = []
     for element in div_resultats_ids:
         div_id = element.get_attribute("id")
-        #print(str(div_id))
+        #html = div_liste_resultats.get_attribute('innerHTML')
+        #print(html.strip())
         liste_id.append(div_id)
     nb_results = len(liste_id)
 
     ## Extract all the links to the documents
-    for i in range(1, nb_results):
-        id_tag = "resultat-id-" + str(i)
-        href_resultat = div_liste_resultats.find_element(By.CLASS_NAME, "result-contenu")
+    divs_contenus = div_liste_resultats.find_elements(By.CLASS_NAME, "result-contenu")
+    i = 1
+    for div_contenu in divs_contenus:
+        html = div_contenu.get_attribute('innerHTML')
+        #print(html.strip())
+        #print("#####")
 
-    ###### OU : pour chaque class="resultContainer", prendre le 1er href
-        
-    html = div_liste_resultats.get_attribute('innerHTML')
-    print(html.strip())
-    ## Save the full page
-    #f = open("lol", "w")
-    #html = driver.page_source
-    #f.write(html)
-    #f.close
+        soup = BeautifulSoup(html.strip(), 'lxml')
 
-    # resultat-id-
+        ## Get ID result
+        divs = soup.div
+        div_next = divs.find_next_sibling("div")
+        id_tag = div_next['data-resultat-id']
+        #print(str(id_tag))
+
+        ## Get A HREF link
+        a_href = soup.find("a").get("href")
+        print(str(a_href))
+        links.append(a_href)
+
+        print("##########")
+        i += 1
 
     ## Close one tab
     #driver.close()
     ## Close the full browser
     driver.quit()
 
-    exit(0)
+    return (links)
 
 # For each line, get the web page and process each result-id
 def process_lines(lines):
@@ -157,12 +208,17 @@ def process_lines(lines):
         date = line_split[0]
         url = line_split[1]
         ###
-        res = get_web_page(url)
 
+        ## Get URLs in the page
+        URLs = get_web_page(url)
 
-        line_resolved = date + " " + ark_id
-        MyCommonTools.update_file_ouput(line_resolved, url_resolved_filename)
-        print("=> One document found")
+        ## Write down the URLs
+        i = 1
+        for new_url in URLs:
+            ark_id = extract_ark_id_from_url(new_url)
+            line_resolved = date + "-" + str(i) + " " + ark_id
+            MyCommonTools.update_file_ouput(line_resolved, url_resolved_filename)
+            i += 1
         ###
         print("#############################################################")
         # read next line
