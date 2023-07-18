@@ -115,7 +115,7 @@ def get_web_page(url):
     #options = webdriver.ChromeOptions()
     #options.add_argument("--headless")
     #driver = webdriver.Chrome(options=options)
-    ## Launch Firefox
+    ## Firefox & No GUI
     options = Options()
     options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
