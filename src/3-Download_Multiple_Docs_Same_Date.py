@@ -23,6 +23,9 @@ from selenium.webdriver.common.by import By
 # Selenium Chromium
 #from selenium.webdriver.chrome.options import Options
 
+# Selelnium Firefox
+from selenium.webdriver.firefox.options import Options
+
 ### Contains small tools for dates and others
 import MyCommonTools
 
@@ -105,11 +108,17 @@ def get_web_page(url):
     links = []
     print("## Checking URL : " + str(url))
     ## Chromium & Force size 1
-    #options = Options()
-    #options.add_argument("window-size=500,300")
-    #driver = webdriver.Chrome(chrome_options=options)
+    #options1 = Options()
+    #options1.add_argument("window-size=500,300")
+    #driver = webdriver.Chrome(chrome_options=options1)
+    ## Chromium & No GUI
+    #options = webdriver.ChromeOptions()
+    #options.add_argument("--headless")
+    #driver = webdriver.Chrome(options=options)
     ## Launch Firefox
-    driver = webdriver.Firefox()
+    options = Options()
+    options.add_argument("--headless")
+    driver = webdriver.Firefox(options=options)
     ## Force size 2
     #driver.set_window_size(500, 300)
     #size = driver.get_window_size()
