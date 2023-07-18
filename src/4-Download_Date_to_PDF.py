@@ -51,7 +51,7 @@ def split_ark_id(ark_id):
 
 # Add a URL to the undownloaded log
 def update_file_undownloaded_log(msg):
-    ark_id_filename_input = sys.argv[1]
+    ark_id_filename_input = sys.argv[2]
     undownloaded_filename = prefix_undownloaded_file_name + ark_id_filename_input
     MyCommonTools.update_file_ouput(msg, undownloaded_filename)
 
@@ -175,7 +175,10 @@ def process_lines(lines):
     update_file_undownloaded_log("# Launching Ark ID downloader for debates at " +
                                  now.strftime("%d/%m/%Y %H:%M:%S"))
 
-    # Continue the process of the file from the last state
+    ## Prepare output directory
+    dirname_output = sys.argv[1]
+
+    ## Continue the process of the file from the last state
     while (cur_line != max_line):
         #ark_id = lines[cur_line]
         ### Manages file with 2 columns
@@ -187,8 +190,8 @@ def process_lines(lines):
 
         ark_id_splitted = split_ark_id(ark_id)
         ## No need for subfolder in the PDF case
-        #dirname = "output_WIP_PDF" + "/" + date + "_" + str(ark_id_splitted[1])
-        dirname = "output_WIP_PDF" + "/"
+        #dirname = dirname_output + "_WIP_PDF" + "/" + date + "_" + str(ark_id_splitted[1])
+        dirname = dirname_output + "_WIP_PDF" + "/"
         filename_prefix = date + "_" + str(ark_id_splitted[1])
 
         # Ark ID, directory output, filename prefix
@@ -218,25 +221,25 @@ def process_lines(lines):
     if (os.path.exists(g_file_last_line_name)):
         os.remove(g_file_last_line_name)
     # And let's rename the folder by adding a "_FINAL" inside
-    dirname_final = "output_PDF" + "_" + MyCommonTools.get_date_and_time()
-    os.rename("output_WIP_PDF",  dirname_final)
+    dirname_final = dirname_output + "_PDF" + "_" + MyCommonTools.get_date_and_time()
+    os.rename(dirname_output + "_WIP_PDF",  dirname_final)
 
     return (0)
 
 # Check for arguments in the CLI
 def main():
     # Check for missing arguments
-    if (len(sys.argv) != 2):
+    if (len(sys.argv) != 3):
         print("Missing parameters")
         print("")
-        print("Usage: " + sys.argv[0] + " list_of_Ark_IDs")
+        print("Usage: " + sys.argv[0] + " output_folder list_of_Ark_IDs")
         print("")
         print("File list_of_Ark_IDs format: [one Ark ID per line]")
         print("[date] [Ark ID]")
         print("date : YYYY-MM-DD     Ark ID : /12148/bpt6k64490143")
         exit(-1)
     else:
-        ark_id_filename_input = sys.argv[1]
+        ark_id_filename_input = sys.argv[2]
         # Check if file is readable
         try:
             with open(ark_id_filename_input) as fd:
@@ -251,7 +254,7 @@ def main():
         except IOError:
             print("File " + ark_id_file_input + " must exist and be readable")
             print("")
-            print("Usage: " + sys.argv[0] + " list_of_Ark_IDs")
+            print("Usage: " + sys.argv[0] + " output_folder list_of_Ark_IDs")
             print("")
             print("File list_of_Ark_IDs format: [one Ark ID per line]")
             print("[date] [Ark ID]")
@@ -265,11 +268,3 @@ def main():
         exit(ret)
 
 main()
-
-
-# MAIN OF TEST
-def main_debats_download_date():
-    url_id1 = "/12148/cb328020951/date18891112"
-    url_id2 = "/12148/bpt6k6494792j/"
-
-    get_document_debat_parlementaire(url_id2, "./outdir/", "essai")

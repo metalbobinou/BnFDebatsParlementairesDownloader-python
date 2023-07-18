@@ -39,29 +39,16 @@ import MyCommonTools
 ## ...anyway : a human MUST check again these documents after.
 # url = "https://gallica.bnf.fr/ark:/12148/cb371291967/date19400101"
 ##
-## !!! WARNING !!!
-##
-## The first "f" is useless for progressing in the documents !
-## Only the second one is important !!!
-## For getting the page 2, you MUST access :                   v
-##   https://gallica.bnf.fr/ark:/12148/bpt6k6494792j/f1.image/f2.jpeg
-## or :
-##   https://gallica.bnf.fr/ark:/12148/bpt6k6494792j/f2.image/f2.jpeg
-##
-##
-## => In order to stop at the end, the module tries to download one more file
-##    and when an HTTP error is produced, than, no more pictures are available
-##
 ##############################################################################
 
 # File containing the last line read
 g_file_last_line_name = "__last_multiple_document_checked.cache"
 
 # File with double resolved URL
-prefix_double_resolved_file_name = "double-resolved_"
+prefix_double_resolved_file_name = "resolved-bis_"
 
 # File with undownloaded URL
-prefix_unresolved_file_name = "double-unresolved_"
+prefix_unresolved_file_name = "unresolved-bis_"
 
 ### Small tools
 

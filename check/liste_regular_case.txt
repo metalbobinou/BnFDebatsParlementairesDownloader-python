@@ -1,0 +1,10 @@
+1893-07-01 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930701
+1893-07-02 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930702
+1893-07-03 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930703
+1893-07-04 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930704
+1893-07-05 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930705
+1893-07-06 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930706
+1893-07-07 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930707
+1893-07-08 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930708
+1893-07-09 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930709
+1893-07-10 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930710
