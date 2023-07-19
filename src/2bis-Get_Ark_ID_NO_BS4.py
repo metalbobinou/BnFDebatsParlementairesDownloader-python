@@ -115,6 +115,13 @@ def get_ressource_url(url):
         print("#############")
         return (None)
 
+    # All other exceptions
+    except Exception as e:
+        print("### UNKNOWN ERROR:")
+        print(str(e))
+        print("#############")
+        return (None)
+
     # Everything is fine
     else:
         print("OK")

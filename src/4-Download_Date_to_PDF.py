@@ -130,6 +130,13 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
         page_exist = False
         return (None)
 
+    # All other exceptions
+    except Exception as e:
+        print("### UNKNOWN ERROR:")
+        print(str(e))
+        print("#############")
+        return (None)
+
     # Everything is fine
     else:
         print("OK")

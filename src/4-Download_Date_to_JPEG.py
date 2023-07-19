@@ -146,6 +146,13 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
             page_exist = False
             return (None)
 
+        # All other exceptions
+        except Exception as e:
+            print("### UNKNOWN ERROR:")
+            print(str(e))
+            print("#############")
+            return (None)
+
         # Everything is fine
         else:
             print("OK - p." + str(page))
