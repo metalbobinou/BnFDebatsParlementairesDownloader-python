@@ -132,7 +132,7 @@ def get_ressource_url(url):
         print("#############")
         return (None, None)
 
-    # All other exceptions
+    # All other exceptions (like "http.client.RemoteDisconnected")
     except Exception as e:
         print("### UNKNOWN ERROR:")
         print(str(e))

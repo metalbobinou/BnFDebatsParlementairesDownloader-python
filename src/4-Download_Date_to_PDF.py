@@ -130,7 +130,7 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
         page_exist = False
         return (None)
 
-    # All other exceptions
+    # All other exceptions (like "http.client.RemoteDisconnected")
     except Exception as e:
         print("### UNKNOWN ERROR:")
         print(str(e))
