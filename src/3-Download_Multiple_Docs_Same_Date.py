@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 
 # Selenium [web browser for JS in code]
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+#from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 
 # Selenium Chromium
@@ -25,6 +25,12 @@ from selenium.webdriver.common.by import By
 
 # Selelnium Firefox
 from selenium.webdriver.firefox.options import Options
+
+# Selenium exceptions
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import WebDriverException
+
+
 
 ### Contains small tools for dates and others
 import MyCommonTools
@@ -82,7 +88,7 @@ def remove_prefix_https_from_url(url):
     match = re.search('^https?://gallica\.bnf\.fr/ark:', url)
     # if no prefix found, let's send back the URL
     if (match == None):
-        return (None)
+        return (url)
 
     # if prefix is found, let's keep only the ark id following it
     ark_id = url[match.end(0):]
@@ -107,24 +113,60 @@ def update_file_unresolved_log(msg):
 def get_web_page(url):
     links = []
     print("## Checking URL : " + str(url))
-    ## Chromium & Force size 1
-    #options1 = Options()
-    #options1.add_argument("window-size=500,300")
-    #driver = webdriver.Chrome(chrome_options=options1)
-    ## Chromium & No GUI
-    #options = webdriver.ChromeOptions()
-    #options.add_argument("--headless")
-    #driver = webdriver.Chrome(options=options)
-    ## Firefox & No GUI
-    options = Options()
-    options.add_argument("--headless")
-    driver = webdriver.Firefox(options=options)
-    ## Force size 2
-    #driver.set_window_size(500, 300)
-    #size = driver.get_window_size()
 
-    ## Open the webpage
-    driver.get(url)
+    # Open a browser without GUI/in a terminal
+    try:
+        ## Chromium & Force size 1
+        #options1 = Options()
+        #options1.add_argument("window-size=500,300")
+        #driver = webdriver.Chrome(chrome_options=options1)
+        ## Chromium & No GUI
+        #options = webdriver.ChromeOptions()
+        #options.add_argument("--headless")
+        #driver = webdriver.Chrome(options=options)
+        ## Firefox & No GUI
+        options = Options()
+        options.add_argument("--headless")
+        driver = webdriver.Firefox(options=options)
+        ## Force size 2
+        #driver.set_window_size(500, 300)
+        #size = driver.get_window_size()
+
+    # Failure in opening
+    except (NoSuchElementException, WebDriverException) as e:
+        print("### WEBDRIVER ERROR WHILE OPENING BROWSER:")
+        print(str(e))
+        print("#############")
+        return (None)
+
+    # All other exceptions
+    except Exception as e:
+        print("### UNKNOWN ERROR WHILE OPENING BROWSER:")
+        print(str(e))
+        print("#############")
+        return (None)
+
+
+    # Open the webpage
+    try:
+        driver.get(url)
+
+    # If server is not responding
+    except (NoSuchElementException, WebDriverException) as e:
+        print("### WEBDRIVER ERROR WHEN REACHING URL:")
+        print(str(e))
+        print("#############")
+        driver.quit()
+        return (None)
+
+    # All other exceptions
+    except Exception as e:
+        print("### UNKNOWN ERROR WHEN REACHING URL:")
+        print(str(e))
+        print("#############")
+        driver.quit()
+        return (None)
+
     ## Save the full page
     f = open("file.htm", "w")
     html = driver.page_source
@@ -207,6 +249,14 @@ def process_lines(lines):
 
         ## Get URLs in the page
         URLs = get_web_page(url)
+
+        if (URLs is None):
+            MyCommonTools.update_file_last_line(cur_line,
+                                                g_file_last_line_name)
+            print("ERROR: Failed at line " + str(cur_line))
+            print("DATE : " + date)
+            print("URL : " + url)
+            return (-3)
 
         ## Write down the URLs
         i = 1
