@@ -203,6 +203,11 @@ def get_web_page(url):
         if (i == 4):
             print("### Couldn't find any 'liste-resultats' in HTML")
             print("### Ending on error here.")
+            ## Save the full page
+            f = open("file_no_liste_resultats.htm", "w")
+            html = driver.page_source
+            f.write(html)
+            f.close
             return (None)
 
     ## Extract all the results ID : <div class="resultat-id" id="resultat-id-X">
