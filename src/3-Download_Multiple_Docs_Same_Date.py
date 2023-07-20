@@ -170,13 +170,40 @@ def get_web_page(url):
         return (None)
 
     ## Save the full page
-    f = open("file.htm", "w")
-    html = driver.page_source
-    f.write(html)
-    f.close
+    #f = open("file.htm", "w")
+    #html = driver.page_source
+    #f.write(html)
+    #f.close
 
     ## Goto the results list : <div class="liste-resultats">
-    div_liste_resultats = driver.find_element(By.CLASS_NAME, "liste-resultats")
+    ## (if it is not found, retry to fetch the page)
+    for i in range (0, 5):
+        try:
+            div_liste_resultats = driver.find_element(By.CLASS_NAME, "liste-resultats")
+        except NoSuchElementException as e:
+            print("##### Couldn't find 'liste-result' in HTML...")
+            print("    [try " + str(i) + " retrying " + str(5 - i) + " times again")
+            try:
+                driver.get(url)
+            except (NoSuchElementException, WebDriverException) as e:
+                print("##### WEBDRIVER ERROR WHEN REACHING URL:")
+                print(str(e))
+                print("#############")
+                driver.quit()
+                return (None)
+            except Exception as e:
+                print("##### UNKNOWN ERROR WHEN REACHING URL:")
+                print(str(e))
+                print("#############")
+                driver.quit()
+                return (None)
+        else:
+            # If "liste-resultats" was found, let's continue
+            break
+        if (i == 4):
+            print("### Couldn't find any 'liste-resultats' in HTML")
+            print("### Ending on error here.")
+            return (None)
 
     ## Extract all the results ID : <div class="resultat-id" id="resultat-id-X">
     ##  (where X is a number)
