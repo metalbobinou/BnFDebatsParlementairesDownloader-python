@@ -1,7 +1,24 @@
 # Highly Required :
 HR3 - check the logs and errors
-HR4 - modify script 2 for resolving multiple Ark ID behind one date
 
+
+# Why not :
+WN1 - create another 3rd script that downloads TXT only
+
+
+### Debats Chambre des Députés : pictures get by adding another 'f'
+https://gallica.bnf.fr/ark:/12148/bpt6k6494792j
+https://gallica.bnf.fr/ark:/12148/bpt6k6494792j/f1.image/f2.jpeg?download=1"
+
+### Tables annuelles (paid/on Retronews for some of them) :
+https://gallica.bnf.fr/ark:/12148/bpt6k3997476x
+https://gallica.bnf.fr/ark:/12148/bpt6k3997476x/f2.highres
+
+
+# -- DONE --
+HR1 - put a date in front of the Ark ID for better management of the dates
+HR2 - create another 3rd script that downloads PDF only
+HR4 - modify script 2 for resolving multiple Ark ID behind one date
 Example:
 https://gallica.bnf.fr/ark:/12148/cb371291967/date.item
 https://gallica.bnf.fr/ark:/12148/cb371291967/date1940
@@ -19,11 +36,3 @@ https://gallica.bnf.fr/ark:/12148/cb328020951/date1893
 https://gallica.bnf.fr/ark:/12148/cb328020951/date18930201
 =>
 https://gallica.bnf.fr/ark:/12148/bpt6k64285087.item
-
-# Why not :
-WN1 - create another 3rd script that downloads TXT only
-
-
-# -- DONE --
-HR1 - put a date in front of the Ark ID for better management of the dates
-HR2 - create another 3rd script that downloads PDF only
