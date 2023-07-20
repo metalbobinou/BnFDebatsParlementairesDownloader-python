@@ -31,7 +31,6 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import WebDriverException
 
 
-
 ### Contains small tools for dates and others
 import MyCommonTools
 
@@ -53,8 +52,11 @@ import MyCommonTools
 # File containing the last line read
 g_file_last_line_name = "__last_multiple_document_checked.cache"
 
-# File with double resolved URL
-prefix_double_resolved_file_name = "resolved-bis_"
+# File with resolved-bis URL
+prefix_resolved_bis_file_name = "resolved-bis_"
+
+# File with external URL
+prefix_external_bis_file_name = "external3_"
 
 # File with undownloaded URL
 prefix_unresolved_file_name = "unresolved-bis_"
@@ -237,7 +239,8 @@ def process_lines(lines):
     update_file_unresolved_log("# Launching URL multiple docs getter at " +
                                now.strftime("%d/%m/%Y %H:%M:%S"))
     # Continue the process of the file from the last state
-    url_resolved_filename = prefix_double_resolved_file_name + url_filename_input
+    url_resolved_filename = prefix_resolved_bis_file_name + url_filename_input
+    url_external_filename = prefix_external_bis_file_name + url_filename_input
     while (cur_line != max_line):
         #url = lines[cur_line]
         ### Manages file with 2 columns
@@ -261,9 +264,15 @@ def process_lines(lines):
         ## Write down the URLs
         i = 1
         for new_url in URLs:
-            ark_id = extract_ark_id_from_url(new_url)
-            line_resolved = date + "-" + str(i) + " " + ark_id
-            MyCommonTools.update_file_ouput(line_resolved, url_resolved_filename)
+            ## If URL is external of Gallica, let's write it in specific file
+            if (not (MyCommonTools.check_gallica_url(new_url))):
+                line_external = date + "-" + str(i) + " " + new_url
+                MyCommonTools.update_file_ouput(line_external, url_external_filename)
+            else:
+                ## else, let's put it in the regular file
+                ark_id = extract_ark_id_from_url(new_url)
+                line_resolved = date + "-" + str(i) + " " + ark_id
+                MyCommonTools.update_file_ouput(line_resolved, url_resolved_filename)
             i += 1
         ###
         print("#############################################################")
@@ -279,7 +288,14 @@ def process_lines(lines):
         url_resolved_filename_final = url_resolved_filename_final + "_final.txt"
         os.rename(url_resolved_filename, url_resolved_filename_final)
     else:
-        print("--no doubleresolved file were created during this script--")
+        print("--no resolved-bis file were created during this script--")
+    # And let's rename the final external list by adding a "_FINAL" inside
+    if (os.path.exists(url_external_filename)):
+        url_external_filename_final = os.path.splitext(url_external_filename)[0]
+        url_external_filename_final = url_external_filename_final + "_final.txt"
+        os.rename(url_external_filename, url_external_filename_final)
+    else:
+        print("--no external cases file were created during this script--")
 
     return (0)
 

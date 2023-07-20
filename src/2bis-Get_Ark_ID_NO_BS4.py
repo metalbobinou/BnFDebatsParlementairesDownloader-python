@@ -33,6 +33,9 @@ g_file_last_line_name = "__last_url_resolved.cache"
 # File with resolved URL / Date has one document
 prefix_resolved_file_name = "resolved_"
 
+# File with external URL / Date has one URL out of Gallica
+prefix_external_file_name = "external2_"
+
 # File with unresolved URL
 prefix_unresolved_file_name = "unresolved_"
 
@@ -146,19 +149,30 @@ def get_ressource_url(url):
 def get_ark_id_from_date_URL(url_date):
     # Let's resolve date URL and obtain the new URL
     url_resolved = get_ressource_url(url_date)
+    external_gallica = False
+
     # if resolved URL is empty, let's write it
     if (url_resolved == None):
         print("## Error :")
         print("  no ressource found")
         print("url_date : --" + url_date + "--")
-        return (None)
+        return (None, external_gallica)
 
     # if URL hasn't changed, let's return it and write an error...
     if (url_resolved == url_date):
         print("## Warning :")
         print("  URL hasn't changed. Let's skip it...")
         print("url_date : --" + url_date + "--")
-        return (url_date)
+        return (url_date, external_gallica)
+
+    # if URL is out of Gallica, let's put it in a specific file
+    if (not (MyCommonTools.check_gallica_url(url_resolved))):
+        external_gallica = True
+        print("## Warning :")
+        print("  URL is out of Gallica")
+        print("    url_date : --" + url_date + "--")
+        print("    liste_resultats : --" + str(liste_resultats) + "--")
+        return (url_resolved, external_gallica)
 
     # if the date has been resolved;, let's parse it for Ark ID
     ## first, let's remove the suffix if it exists : the final ".item"
@@ -172,10 +186,10 @@ def get_ark_id_from_date_URL(url_date):
         print("url_resolved : --" + url_resolved + "--")
         print("url_no_suffix : --" + url_no_suffix + "--")
 
-        return (None)
+        return (None, external_gallica)
 
     # Ark ID has been found
-    return (ark_id)
+    return (ark_id, external_gallica)
 
 # For each line, try to resolve it, or write in unresolved logs that it failed
 def process_lines(lines):
@@ -198,6 +212,7 @@ def process_lines(lines):
 
     # Continue the process of the file from the last state
     url_resolved_filename = prefix_resolved_file_name + url_filename_input
+    url_external_filename = prefix_external_file_name + url_filename_input
     while (cur_line != max_line):
         #url = lines[cur_line]
         ### Manages file with 2 columns
@@ -206,7 +221,11 @@ def process_lines(lines):
         date = line_split[0]
         url = line_split[1]
         ###
-        ark_id = get_ark_id_from_date_URL(url)
+        #ark_id = get_ark_id_from_date_URL(url)
+        answers = get_ark_id_from_date_URL(url)
+        ark_id = answers[0]
+        external_gallica = answers[1]
+
         # if ark_id was not found, write down the number where it failed and stop
         if (ark_id == None):
             MyCommonTools.update_file_last_line(cur_line, g_file_last_line_name)
@@ -226,6 +245,17 @@ def process_lines(lines):
             print("#############################################################")
             cur_line += 1
             continue
+
+        # if resolved link is external of gallica, let's write it in specific file
+        if (external_gallica == True):
+            line_external = date + " " + url
+            MyCommonTools.update_file_ouput(line_external, url_external_filename)
+            print("=> External URL")
+            ###
+            print("#############################################################")
+            cur_line += 1
+            continue
+
 
         # if everything OK, let's write the result in the output file
         #update_file_ouput(ark_id, url_resolved_filename_output)
@@ -247,7 +277,14 @@ def process_lines(lines):
         url_resolved_filename_final = url_resolved_filename_final + "_final.txt"
         os.rename(url_resolved_filename, url_resolved_filename_final)
     else:
-        print("--no file were created during this script--")
+        print("--no resolved file were created during this script--")
+    # And let's rename the final external list by adding a "_FINAL" inside
+    if (os.path.exists(url_external_filename)):
+        url_external_filename_final = os.path.splitext(url_external_filename)[0]
+        url_external_filename_final = url_external_filename_final + "_final.txt"
+        os.rename(url_external_filename, url_external_filename_final)
+    else:
+        print("--no external cases file were created during this script--")
 
     return (0)
 

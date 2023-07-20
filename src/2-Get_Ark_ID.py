@@ -41,6 +41,9 @@ prefix_resolved_file_name = "resolved_"
 # File with complex URL / Date has multiple documents
 prefix_complex_file_name = "complex_"
 
+# File with external URL / Date has one URL out of Gallica
+prefix_external_file_name = "external2_"
+
 # File with unresolved URL / Date has no document
 prefix_unresolved_file_name = "unresolved_"
 
@@ -78,6 +81,7 @@ def remove_prefix_https_from_url(url):
     match = re.search('^https?://gallica\.bnf\.fr/ark:', url)
     # if no prefix found, let's send back the URL
     if (match is None):
+        #return (url)
         return (None)
 
     # if prefix is found, let's keep only the ark id following it
@@ -190,20 +194,22 @@ def get_ressource_url(url):
         return (url_new, False)
 
 
-# Resolve a URL and extract its Ark ID + inform if a "liste-resultats" was found or not
+# Resolve a URL and extract its Ark ID
+## Return value : Ark ID + contains multiple docs ? + external of gallica ?
 def get_ark_id_from_date_URL(url_date):
     # Let's resolve date URL and obtain the new URL
     #url_resolved = get_ressource_url(url_date)
     answers = get_ressource_url(url_date)
     url_resolved = answers[0]
     liste_resultats = answers[1]
+    external_gallica = False
 
     # if resolved URL is empty, let's write it
     if (url_resolved is None):
         print("## Error :")
         print("  No ressource found")
         print("    url_date : --" + url_date + "--")
-        return (answers)
+        return (url_resolved, liste_resultats, external_gallica)
 
     # if URL hasn't changed, let's return it and write an error...
     if (url_resolved == url_date):
@@ -211,7 +217,16 @@ def get_ark_id_from_date_URL(url_date):
         print("  URL hasn't changed")
         print("    url_date : --" + url_date + "--")
         print("    liste_resultats : --" + str(liste_resultats) + "--")
-        return (answers)
+        return (url_resolved, liste_resultats, external_gallica)
+
+    # if URL is out of Gallica, let's put it in a specific file
+    if (not (MyCommonTools.check_gallica_url(url_resolved))):
+        external_gallica = True
+        print("## Warning :")
+        print("  URL is out of Gallica")
+        print("    url_date : --" + url_date + "--")
+        print("    liste_resultats : --" + str(liste_resultats) + "--")
+        return (url_resolved, liste_resultats, external_gallica)
 
     # if the date has been resolved;, let's parse it for Ark ID
     ## first, let's remove the suffix if it exists : the final ".item"
@@ -219,16 +234,16 @@ def get_ark_id_from_date_URL(url_date):
     ## next, let's remove the prefix : the http[s]://...
     ark_id = remove_prefix_https_from_url(url_no_suffix)
     if (ark_id is None):
+        #if (ark_id == url_no_suffix):
         print("## Error :")
         print("  Can't find the Ark ID in the URL")
         print("    url_date : --" + url_date + "--")
         print("    url_resolved : --" + url_resolved + "--")
         print("    url_no_suffix : --" + url_no_suffix + "--")
-
-        return (answers)
+        return (url_resolved, liste_resultats, external_gallica)
 
     # Ark ID has been found
-    return (ark_id, False)
+    return (ark_id, False, external_gallica)
 
 # For each line, try to resolve it, or write in unresolved logs that it failed
 def process_lines(lines):
@@ -252,6 +267,7 @@ def process_lines(lines):
     # Continue the process of the file from the last state
     url_resolved_filename = prefix_resolved_file_name + url_filename_input
     url_complex_filename = prefix_complex_file_name + url_filename_input
+    url_external_filename = prefix_external_file_name + url_filename_input
     while (cur_line != max_line):
         #url = lines[cur_line]
         ### Manages file with 2 columns
@@ -263,7 +279,8 @@ def process_lines(lines):
         #ark_id = get_ark_id_from_date_URL(url)
         answers = get_ark_id_from_date_URL(url)
         ark_id = answers[0]
-        found_liste_resultats_class = answers[1]
+        multiple_docs = answers[1]
+        external_gallica = answers[2]
 
         # if ark_id was not found, write down the number where it failed and stop
         if (ark_id is None):
@@ -278,7 +295,7 @@ def process_lines(lines):
         #   however, if there was a "liste-resultats" class, then there are multiple docs...
         #   and let's write it in a special log
         if (ark_id == url):
-            if (found_liste_resultats_class == False):
+            if (multiple_docs == False):
                 #update_file_unresolved_log(url)
                 ### Add day and name of the day in the log
                 DOTW = MyCommonTools.get_day_or_the_week(date)
@@ -289,6 +306,16 @@ def process_lines(lines):
                 line_complex = date + " " + url
                 MyCommonTools.update_file_ouput(line_complex, url_complex_filename)
                 print("=> Multiple documents found")
+            ###
+            print("#############################################################")
+            cur_line += 1
+            continue
+
+        # if resolved link is external of gallica, let's write it in specific file
+        if (external_gallica == True):
+            line_external = date + " " + url
+            MyCommonTools.update_file_ouput(line_external, url_external_filename)
+            print("=> External URL")
             ###
             print("#############################################################")
             cur_line += 1
@@ -323,6 +350,13 @@ def process_lines(lines):
         os.rename(url_complex_filename, url_complex_filename_final)
     else:
         print("--no complex cases file were created during this script--")
+    # And let's rename the final external list by adding a "_FINAL" inside
+    if (os.path.exists(url_external_filename)):
+        url_external_filename_final = os.path.splitext(url_external_filename)[0]
+        url_external_filename_final = url_external_filename_final + "_final.txt"
+        os.rename(url_external_filename, url_external_filename_final)
+    else:
+        print("--no external cases file were created during this script--")
 
     return (0)
 

@@ -1,6 +1,9 @@
 # OS & Files
 import os
 
+# Regexp
+import re
+
 # Date
 import datetime
 
@@ -58,3 +61,14 @@ def prepare_out_directory(directory):
     isExist = os.path.exists(directory)
     if not isExist:
         os.makedirs(directory)
+
+
+### URL tools
+
+# Check if a URL is still in Gallica with an Ark ID
+def check_gallica_url(url):
+    match = re.search('^https?://gallica\.bnf\.fr/ark:', url)
+    if (match is None):
+        return (False)
+    else:
+        return (True)
