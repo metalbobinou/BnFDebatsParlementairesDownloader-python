@@ -34,28 +34,29 @@ __python src/1-Choose_Range.py 1893-07-01 1893-07-10 https://gallica.bnf.fr/ark:
 - It produces a long list of URLs with dates (without checking if they exist or
 not). Now, use the script 2 to resolve these URLs and obtain the Ark IDs.
 
-__python src/2-Get_Ark_ID.py list_url.txt__
+__python src/2-Get_Ark_ID.py 1-list_url.txt__
 
-- Three files are created, one with "resolved" URLs into Ark ID, one with
-"complex" URLs where one date contains multiple documents, and one with
-"unresolved" URLs. You should check why they were not resolved. Maybe there
-was not any debates this day... You can check online on Gallica if there is a
-document this day or not by reading the "unresolved_" file (you can read it).
+- Four files are created, one with "resolved" URLs into Ark ID, one with
+"complex" URLs where one date contains multiple documents, one with "external"
+URLs where the dates redirects to external websites, and one with "unresolved"
+URLs. You should check why they were not resolved. Maybe there was not any
+debates this day... You can check online on Gallica if there is a document this
+day or not by reading the "unresolved_" file (you can read it).
 Keep in my this file is UPDATED! You should remove it if you want to check from
 scratch what is available online or not.
 Concerning the "complex" URLs, you must check later, with the final picture, if
 it was the same document scanned multiple times (on microfilms and regular
 scan) or if there really was multiple documents the same day.
 
-__python 3-Download_Multiple_Docs_Same_Date.py complex_list_url.txt__
+__python 3-Download_Multiple_Docs_Same_Date.py 2-complex_list_url.txt__
 
 - Two files are created, one with "resolved-bis" prefix containing the browsed
 URLs with the Ark ID of each document found, and one with "unresolved-bis" URLs
 for URLs which couldn't be resolved.
 
-__python src/4-Download_Date_to_JPEG.py output_folder resolved_list_url.txt__
+__python src/4-Download_Date_to_JPEG.py output_folder 2-resolved_list_url.txt__
 
-__python src/4-Download_Date_to_JPEG.py output_folder resolved-bis_complex_list_url.txt__
+__python src/4-Download_Date_to_JPEG.py output_folder 3-resolved-bis_complex_list_url.txt__
 
 - Finally, use the script 4 on the "resolved_" file containing all of the ARK
 IDs. An output directory name must be given (it will eventually be created).
@@ -65,14 +66,15 @@ folder is created, and when everything is done, it is renamed
 Inside, you'll find subdirectories with dates and ARK IDs.
 
 # Explanations:
-- The script 2 produces three outputs : "resolved_", "complex_", and
-"unresolved_".
+- The script 2 produces three outputs : "2-resolved_", "2-complex_",
+"2-external_" and "2-unresolved_".
 The "unresolved_" contains the URL that were not resolved... probably because
 there was no debates this day!
 In order to confirm, you can check online on the Gallica website: the log
 contains useful informations like the day AND the day of the week (monday, ...)
 The "complex_" contains the URL where each date has multiple documents. It is
 more difficult to obtain the Ark ID.
+The "external_" contains the URL which redirects to websites external to Gallica
 
 
 - The script 4 produces a directory containing subdirectories with all of the
