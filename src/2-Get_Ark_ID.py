@@ -33,19 +33,19 @@ import MyCommonTools
 ##############################################################################
 
 # File containing the last line read
-g_file_last_line_name = "__last_url_resolved.cache"
+g_file_last_line_name = "__2-last_url_resolved.cache"
 
 # File with resolved URL / Date has one document
-prefix_resolved_file_name = "resolved_"
+prefix_resolved_file_name = "2-resolved_"
 
 # File with complex URL / Date has multiple documents
-prefix_complex_file_name = "complex_"
+prefix_complex_file_name = "2-complex_"
 
 # File with external URL / Date has one URL out of Gallica
-prefix_external_file_name = "external2_"
+prefix_external_file_name = "2-external_"
 
 # File with unresolved URL / Date has no document
-prefix_unresolved_file_name = "unresolved_"
+prefix_unresolved_file_name = "2-unresolved_"
 
 ### Small tools
 

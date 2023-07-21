@@ -33,10 +33,10 @@ import MyCommonTools
 ##############################################################################
 
 # File containing the last line read
-g_file_last_line_name = "__last_ark_id_pdf_downloaded.cache"
+g_file_last_line_name = "__4P-last_ark_id_pdf_downloaded.cache"
 
 # File with unresolved URL
-prefix_undownloaded_file_name = "undownloaded_"
+prefix_undownloaded_file_name = "4P-undownloaded_"
 
 ### Small tools
 
@@ -207,11 +207,16 @@ def process_lines(lines):
                                                              filename_prefix)
 
         ## If an error occurred, let's save where we were
-        #if (pages_written == None):
-        #    update_file_last_line(cur_line, g_file_last_line_name)
-        #    update_file_error_log("Failed at line " + str(cur_line))
-        #    update_file_error_log("Ark ID : " + ark_id)
-        #    return (-3)
+        if (pages_written == None):
+            #MyCommonTools.update_file_last_line(cur_line,
+            #                                    g_file_last_line_name)
+            line_undownloaded = date + " " + ark_id
+            update_file_undownloaded_log(line_undownloaded)
+            print("ERROR: Failed at line " + str(cur_line))
+            print("DATE : " + date)
+            print("ARK ID : " + ark_id)
+            ### IF YOU WISH TO STOP THE SCRIPT IN CASE OF ERROR, UNCOMMENT RETURN
+            #return (-3)
 
         ## If only one page were written... do something ? [unusable in the PDF case]
         #if (pages_written == 1):

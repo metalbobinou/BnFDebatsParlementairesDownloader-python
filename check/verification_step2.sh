@@ -1,10 +1,11 @@
 #! /bin/sh
 
-LIST="list_*"
-RESOLVED="resolved_*"
-COMPLEX="complex_*"
-EXTERNA="external2_*"
-UNRESOLVED="unresolved_*"
+RESOLVED="2-resolved_*"
+COMPLEX="2-complex_*"
+EXTERNA="2-external_*"
+UNRESOLVED="2-unresolved_*"
+
+LIST="1-list_*"
 
 cat ${RESOLVED} ${COMPLEX} ${EXTERNAL} ${UNRESOLVED} > v_RCEU_1.txt
 cat v_RCEU_1.txt | awk -F " " '{ print $1}' > v_RCEU_2.txt

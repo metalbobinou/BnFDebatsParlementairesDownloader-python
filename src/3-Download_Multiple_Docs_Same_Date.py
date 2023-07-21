@@ -50,16 +50,16 @@ import MyCommonTools
 ##############################################################################
 
 # File containing the last line read
-g_file_last_line_name = "__last_multiple_document_checked.cache"
+g_file_last_line_name = "__3-last_multiple_document_checked.cache"
 
 # File with resolved-bis URL
-prefix_resolved_bis_file_name = "resolved-bis_"
+prefix_resolved_bis_file_name = "3-resolved-mul_"
 
 # File with external URL
-prefix_external_bis_file_name = "external3_"
+prefix_external_bis_file_name = "3-external-mul_"
 
 # File with undownloaded URL
-prefix_unresolved_file_name = "unresolved-bis_"
+prefix_unresolved_file_name = "3-unresolved-mul_"
 
 ### Small tools
 

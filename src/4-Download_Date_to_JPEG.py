@@ -41,10 +41,10 @@ import MyCommonTools
 ##############################################################################
 
 # File containing the last line read
-g_file_last_line_name = "__last_ark_id_jpeg_downloaded.cache"
+g_file_last_line_name = "__4J-last_ark_id_jpeg_downloaded.cache"
 
 # File with unresolved URL
-prefix_undownloaded_file_name = "undownloaded_"
+prefix_undownloaded_file_name = "4J-undownloaded_"
 
 ### Small tools
 
@@ -234,8 +234,8 @@ def process_lines(lines):
         ## If an error occurred, let's save where we were
         ##   Error => when no pages were downloaded + no error 503 happened
         if ((pages_written == None) and (error_503 == False)):
-            MyCommonTools.update_file_last_line(cur_line,
-                                                g_file_last_line_name)
+            #MyCommonTools.update_file_last_line(cur_line,
+            #                                    g_file_last_line_name)
             line_undownloaded = date + " " + ark_id
             update_file_undownloaded_log(line_undownloaded)
             print("ERROR: Failed at line " + str(cur_line))

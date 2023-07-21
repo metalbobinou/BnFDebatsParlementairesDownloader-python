@@ -28,16 +28,16 @@ import MyCommonTools
 ##############################################################################
 
 # File containing the last line read
-g_file_last_line_name = "__last_url_resolved.cache"
+g_file_last_line_name = "__2bis-last_url_resolved.cache"
 
 # File with resolved URL / Date has one document
-prefix_resolved_file_name = "resolved_"
+prefix_resolved_file_name = "2bis-resolved_"
 
 # File with external URL / Date has one URL out of Gallica
-prefix_external_file_name = "external2_"
+prefix_external_file_name = "2bis-external_"
 
 # File with unresolved URL
-prefix_unresolved_file_name = "unresolved_"
+prefix_unresolved_file_name = "2bis-unresolved_"
 
 ### Small tools
 
