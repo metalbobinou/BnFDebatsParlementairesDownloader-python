@@ -2,7 +2,7 @@
 
 RESOLVED="2-resolved_*"
 COMPLEX="2-complex_*"
-EXTERNA="2-external_*"
+EXTERNAL="2-external_*"
 UNRESOLVED="2-unresolved_*"
 
 LIST="1-list_*"
