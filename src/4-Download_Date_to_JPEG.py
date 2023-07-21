@@ -67,6 +67,7 @@ def update_file_undownloaded_log(msg):
 ### Main JPEG downloader
 
 # Download each JPG until an error 503 occurs (when the end of document is reached)
+#  returns the number of pages downloaded[0] and if an error 503 occured[1]
 ### identifier = ark_id
 ### directory = directory where to put files
 ### prefix_filename = output file prefix
@@ -93,6 +94,9 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
         url_page = '/f' + str(page) + '.image/f' + str(page) + '.jpeg?download=1'
         url = url_gallica_prefix + url_ark_id + url_page
 
+        # Prepare return values
+        error_503 = False
+
         # Prepare request
         req = urllib.request.Request(url)
         print("trying request...")
@@ -117,14 +121,15 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
                 ## Error 503 : we reached the end of the document
                 if ((int(e.code) == 503) and (page != 1)):
                     print("# Stopped at page " + str(page) + " with HTTP 503")
-                    return (None)
+                    error_503 = True
+                    return (None, error_503)
             print("# Stopped at page " + str(page))
             print("#############")
             print(e.read())
             print("#############")
 
             page_exist = False
-            return (None)
+            return (None, error_503)
 
         # Exception URL Error
         except urllib.error.URLError as e:
@@ -144,14 +149,14 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
             print("#############")
 
             page_exist = False
-            return (None)
+            return (None, error_503)
 
         # All other exceptions (like "http.client.RemoteDisconnected")
         except Exception as e:
             print("### UNKNOWN ERROR:")
             print(str(e))
             print("#############")
-            return (None)
+            return (None, error_503)
 
         # Everything is fine
         else:
@@ -166,7 +171,7 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
             #text = data.decode(info.get_param('charset', 'utf-8'))
             #text = data.decode('utf-8')
             print("## url_new : " + str(url_new))
-            print("## headers : " + str(headers))
+            #print("## headers : " + str(headers))
             print("## status  : " + str(status))
 
             # Write out the current file
@@ -179,7 +184,7 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
             page += 1
 
     # Let's return the number of pages written
-    return (page)
+    return (page, error_503)
 
 
 # For each line, try to download all of the JPEG
@@ -217,16 +222,27 @@ def process_lines(lines):
         filename_prefix = date + "_" + str(ark_id_splitted[1])
 
         # Ark ID, directory output, filename prefix
-        pages_written = get_document_debat_parlementaire(ark_id,
-                                                         dirname,
-                                                         filename_prefix)
+        #pages_written = get_document_debat_parlementaire(ark_id,
+        #                                                 dirname,
+        #                                                 filename_prefix)
+        answers = get_document_debat_parlementaire(ark_id,
+                                                   dirname,
+                                                   filename_prefix)
+        pages_written = answers[0]
+        error_503 = answers[1]
 
         ## If an error occurred, let's save where we were
-        #if (pages_written == None):
-        #    update_file_last_line(cur_line, g_file_last_line_name)
-        #    update_file_error_log("Failed at line " + str(cur_line))
-        #    update_file_error_log("Ark ID : " + ark_id)
-        #    return (-3)
+        ##   Error => when no pages were downloaded + no error 503 happened
+        if ((pages_written == None) and (error_503 == False)):
+            MyCommonTools.update_file_last_line(cur_line,
+                                                g_file_last_line_name)
+            line_undownloaded = date + " " + ark_id
+            update_file_undownloaded_log(line_undownloaded)
+            print("ERROR: Failed at line " + str(cur_line))
+            print("DATE : " + date)
+            print("ARK ID : " + ark_id)
+            ### IF YOU WISH TO STOP THE SCRIPT IN CASE OF ERROR, UNCOMMENT RETURN
+            #return (-3)
 
         ## If only one page were written... do something ? [probably unusable]
         #if (pages_written == 1):
