@@ -239,11 +239,10 @@ def process_lines(lines):
             print("ERROR: Failed at line " + str(cur_line))
             print("DATE : " + date)
             print("ARK ID : " + ark_id)
-            MyCommonTools.print_time("%%%% END PROCESSING")
             ### IF YOU WISH TO STOP THE SCRIPT IN CASE OF ERROR, UNCOMMENT NEXT LINES
-            #MyCommonTools.update_file_last_line(cur_line,
-            #                                    g_file_last_line_name)
-            #return (-3)
+            MyCommonTools.update_file_last_line(cur_line,
+                                                g_file_last_line_name)
+            return (-3)
 
         ## If only one page were written... do something ? [probably unusable]
         #if (pages_written == 1):

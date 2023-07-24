@@ -289,7 +289,6 @@ def process_lines(lines):
             print("ERROR: Failed at line " + str(cur_line))
             print("DATE : " + date)
             print("URL : " + url)
-            MyCommonTools.print_time("%%%% END PROCESSING")
             MyCommonTools.update_file_last_line(cur_line,
                                                 g_file_last_line_name)
             return (-3)
