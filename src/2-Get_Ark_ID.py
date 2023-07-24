@@ -284,11 +284,12 @@ def process_lines(lines):
 
         # if ark_id was not found, write down the number where it failed and stop
         if (ark_id is None):
-            MyCommonTools.update_file_last_line(cur_line,
-                                                g_file_last_line_name)
             print("ERROR: Failed at line " + str(cur_line))
             print("DATE : " + date)
             print("URL : " + url)
+            MyCommonTools.print_time("%%%% END PROCESSING")
+            MyCommonTools.update_file_last_line(cur_line,
+                                                g_file_last_line_name)
             return (-3)
 
         # if URL hasn't changed, let's skip it (add write it in the unresolved log)
@@ -397,7 +398,9 @@ def main():
             exit(-2)
 
         # In other case, when evrything is fine, let's process lines
+        MyCommonTools.print_time("%%%% BEGIN PROCESSING")
         ret = process_lines(lines)
+        MyCommonTools.print_time("%%%% END PROCESSING")
 
         exit(ret)
 

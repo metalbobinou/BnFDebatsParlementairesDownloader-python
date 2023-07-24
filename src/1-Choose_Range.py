@@ -7,6 +7,9 @@ import re
 # Date
 import datetime
 
+### Contains small tools for dates and others
+import MyCommonTools
+
 ## OLD
 # Prefix common to all parliamentary debates
 #g_prefix_debates = "https://gallica.bnf.fr/ark:/12148/cb328020951/"
@@ -171,7 +174,9 @@ def main():
         prefix_url = sys.argv[3] + "date"
         suffix_url = ""
 
+        MyCommonTools.print_time("%%%% BEGIN PROCESSING")
         ret = process_dates_prefix(first_date, last_date, prefix_url, suffix_url)
+        MyCommonTools.print_time("%%%% END PROCESSING")
 
         return (0)
 

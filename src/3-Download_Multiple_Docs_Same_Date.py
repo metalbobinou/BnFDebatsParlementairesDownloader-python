@@ -286,11 +286,12 @@ def process_lines(lines):
         URLs = get_web_page(url)
 
         if (URLs is None):
-            MyCommonTools.update_file_last_line(cur_line,
-                                                g_file_last_line_name)
             print("ERROR: Failed at line " + str(cur_line))
             print("DATE : " + date)
             print("URL : " + url)
+            MyCommonTools.print_time("%%%% END PROCESSING")
+            MyCommonTools.update_file_last_line(cur_line,
+                                                g_file_last_line_name)
             return (-3)
 
         ## Write down the URLs
@@ -367,7 +368,9 @@ def main():
             exit(-2)
 
 	# In other case, when evrything is fine, let's process lines
+        MyCommonTools.print_time("%%%% BEGIN PROCESSING")
         ret = process_lines(lines)
+        MyCommonTools.print_time("%%%% END PROCESSING")
 
         exit(ret)
 

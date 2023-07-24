@@ -208,15 +208,16 @@ def process_lines(lines):
 
         ## If an error occurred, let's save where we were
         if (pages_written == None):
-            #MyCommonTools.update_file_last_line(cur_line,
-            #                                    g_file_last_line_name)
             line_undownloaded = date + " " + ark_id
             update_file_undownloaded_log(line_undownloaded)
             print("ERROR: Failed at line " + str(cur_line))
             print("DATE : " + date)
             print("ARK ID : " + ark_id)
+            MyCommonTools.print_time("%%%% END PROCESSING")
             ### IF YOU WISH TO STOP THE SCRIPT IN CASE OF ERROR, UNCOMMENT RETURN
-            #return (-3)
+            MyCommonTools.update_file_last_line(cur_line,
+                                                g_file_last_line_name)
+            return (-3)
 
         ## If only one page were written... do something ? [unusable in the PDF case]
         #if (pages_written == 1):
@@ -275,7 +276,9 @@ def main():
 
 
         # In other case, when evrything is fine, let's process lines
+        MyCommonTools.print_time("%%%% BEGIN PROCESSING")
         ret = process_lines(lines)
+        MyCommonTools.print_time("%%%% END PROCESSING")
 
         exit(ret)
 

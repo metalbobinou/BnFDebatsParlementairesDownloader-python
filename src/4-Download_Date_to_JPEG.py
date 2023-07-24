@@ -234,14 +234,15 @@ def process_lines(lines):
         ## If an error occurred, let's save where we were
         ##   Error => when no pages were downloaded + no error 503 happened
         if ((pages_written == None) and (error_503 == False)):
-            #MyCommonTools.update_file_last_line(cur_line,
-            #                                    g_file_last_line_name)
             line_undownloaded = date + " " + ark_id
             update_file_undownloaded_log(line_undownloaded)
             print("ERROR: Failed at line " + str(cur_line))
             print("DATE : " + date)
             print("ARK ID : " + ark_id)
-            ### IF YOU WISH TO STOP THE SCRIPT IN CASE OF ERROR, UNCOMMENT RETURN
+            MyCommonTools.print_time("%%%% END PROCESSING")
+            ### IF YOU WISH TO STOP THE SCRIPT IN CASE OF ERROR, UNCOMMENT NEXT LINES
+            #MyCommonTools.update_file_last_line(cur_line,
+            #                                    g_file_last_line_name)
             #return (-3)
 
         ## If only one page were written... do something ? [probably unusable]
@@ -301,7 +302,9 @@ def main():
 
 
         # In other case, when evrything is fine, let's process lines
+        MyCommonTools.print_time("%%%% BEGIN PROCESSING")
         ret = process_lines(lines)
+        MyCommonTools.print_time("%%%% END PROCESSING")
 
         exit(ret)
 

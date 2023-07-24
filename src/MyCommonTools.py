@@ -40,6 +40,14 @@ def get_day_or_the_week(date):
     DOTW = datetime_object.strftime('%A')
     return (DOTW)
 
+# Print on STDOUT the date and time + optionally a message
+def print_time(msg=""):
+    now_str = get_date_and_time()
+    if (str(msg) != ""):
+        print(str(now_str) + " " + str(msg))
+    else:
+        print(str(now_str))
+
 
 ### File tools
 
