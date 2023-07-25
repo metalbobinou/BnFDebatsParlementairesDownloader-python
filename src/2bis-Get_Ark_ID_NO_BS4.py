@@ -126,8 +126,8 @@ def get_ressource_url(url):
     req = urllib.request.Request(url)
     print("trying request...")
     try:
-        # Send request
-        response = urllib.request.urlopen(req)
+        # Send request + Limit by time
+        response = urllib.request.urlopen(req, timeout=600)
 
     # Exception HTTP Error
     except urllib.error.HTTPError as e:
@@ -160,13 +160,23 @@ def get_ressource_url(url):
         print("#############")
         return (None)
 
+    # Timeout reached
+    except TimeoutError as e:
+        print("### TIMEOUT ERROR:")
+        print("# Connection has been hanged... (probably because of no answer from server)")
+        print("# Stopped at page " + str(page))
+        print(str(e))
+        print("#############")
+        return (None)
+
     # Catch "Ctrl + C" closer
     except KeyboardInterrupt as e:
         print("### KEYBOARD INTERRUPT (Ctrl+C ?):")
+        print("# Stopped at page " + str(page))
         print(str(e))
         print("#############")
         logging.error(traceback.format_exc())
-        return (None, None)
+        return (None)
 
     # All other exceptions (like "http.client.RemoteDisconnected")
     except Exception as e:

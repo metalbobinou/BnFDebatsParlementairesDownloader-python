@@ -77,7 +77,7 @@ def signal_default_handler(signal, frame):
     print("!!!!! SIGNAL (" + str(signal) + ") CAUGHT !!!!!")
     signal_graceful_exit()
 
-# Declare which signals to handle                                                                        
+# Declare which signals to handle
 def signal_declare_handlers():
     ## SIGTERM = regular "kill"
     signal.signal(signal.SIGTERM, signal_term_handler)
@@ -142,8 +142,8 @@ def get_ressource_url(url):
     req = urllib.request.Request(url)
     print("trying request...")
     try:
-        # Send request
-        response = urllib.request.urlopen(req)
+        # Send request + Limit by time
+        response = urllib.request.urlopen(req, timeout=600)
 
     # Exception HTTP Error
     except urllib.error.HTTPError as e:
@@ -178,9 +178,19 @@ def get_ressource_url(url):
         print("#############")
         return (None, None)
 
+    # Timeout reached
+    except TimeoutError as e:
+        print("### TIMEOUT ERROR:")
+        print("# Connection has been hanged... (probably because of no answer from server)")
+        print("# Stopped at page " + str(page))
+        print(str(e))
+        print("#############")
+        return (None, None)
+
     # Catch "Ctrl + C" closer
     except KeyboardInterrupt as e:
         print("### KEYBOARD INTERRUPT (Ctrl+C ?):")
+        print("# Stopped at page " + str(page))
         print(str(e))
         print("#############")
         logging.error(traceback.format_exc())
