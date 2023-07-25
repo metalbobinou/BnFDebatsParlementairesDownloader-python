@@ -2,6 +2,10 @@
 import sys
 import os
 
+# Exceptions tracking
+import traceback
+import logging
+
 # Regexp
 import re
 
@@ -151,11 +155,20 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
             page_exist = False
             return (None, error_503)
 
+        # Catch "Ctrl + C" closer
+        except KeyboardInterrupt as e:
+            print("### KEYBOARD INTERRUPT (Ctrl+C ?):")
+            print(str(e))
+            print("#############")
+            logging.error(traceback.format_exc())
+            return (None, error_503)
+
         # All other exceptions (like "http.client.RemoteDisconnected")
         except Exception as e:
             print("### UNKNOWN ERROR:")
             print(str(e))
             print("#############")
+            logging.error(traceback.format_exc())
             return (None, error_503)
 
         # Everything is fine
@@ -163,6 +176,7 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
             print("OK - p." + str(page))
 
             # Get HTTP response
+
             data = response.read()
             info = response.info()
             url_new = response.url

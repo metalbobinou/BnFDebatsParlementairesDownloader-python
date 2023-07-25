@@ -2,6 +2,10 @@
 import sys
 import os
 
+# Exceptions tracking
+import traceback
+import logging
+
 # Regexp
 import re
 
@@ -134,6 +138,14 @@ def get_ressource_url(url):
         else:
             print("(no e.read())")
         print("#############")
+        return (None, None)
+
+    # Catch "Ctrl + C" closer
+    except KeyboardInterrupt as e:
+        print("### KEYBOARD INTERRUPT (Ctrl+C ?):")
+        print(str(e))
+        print("#############")
+        logging.error(traceback.format_exc())
         return (None, None)
 
     # All other exceptions (like "http.client.RemoteDisconnected")

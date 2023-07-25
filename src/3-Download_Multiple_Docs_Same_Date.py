@@ -3,6 +3,10 @@ import sys
 import os
 from io import StringIO, BytesIO
 
+# Exceptions tracking
+import traceback
+import logging
+
 # Regexp
 import re
 
@@ -161,6 +165,14 @@ def get_web_page(url):
         driver.quit()
         return (None)
 
+    # Catch "Ctrl + C" closer
+    except KeyboardInterrupt as e:
+        print("### KEYBOARD INTERRUPT (Ctrl+C ?):")
+        print(str(e))
+        print("#############")
+        logging.error(traceback.format_exc())
+        return (None)
+
     # All other exceptions
     except Exception as e:
         print("### UNKNOWN ERROR WHEN REACHING URL:")
@@ -190,6 +202,12 @@ def get_web_page(url):
                 print(str(e))
                 print("#############")
                 driver.quit()
+                return (None)
+            except KeyboardInterrupt as e:
+                print("### KEYBOARD INTERRUPT (Ctrl+C ?):")
+                print(str(e))
+                print("#############")
+                logging.error(traceback.format_exc())
                 return (None)
             except Exception as e:
                 print("##### UNKNOWN ERROR WHEN REACHING URL:")

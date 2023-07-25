@@ -2,6 +2,10 @@
 import sys
 import os
 
+# Exceptions tracking
+import traceback
+import logging
+
 # Regexp
 import re
 
@@ -129,6 +133,14 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
 
         page_exist = False
         return (None)
+
+    # Catch "Ctrl + C" closer
+    except KeyboardInterrupt as e:
+        print("### KEYBOARD INTERRUPT (Ctrl+C ?):")
+        print(str(e))
+        print("#############")
+        logging.error(traceback.format_exc())
+        return (None, error_503)
 
     # All other exceptions (like "http.client.RemoteDisconnected")
     except Exception as e:
