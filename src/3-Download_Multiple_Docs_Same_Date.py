@@ -7,6 +7,9 @@ from io import StringIO, BytesIO
 import traceback
 import logging
 
+# Signal handler
+import signal
+
 # Regexp
 import re
 
@@ -64,6 +67,40 @@ prefix_external_bis_file_name = "3-external-mul_"
 
 # File with undownloaded URL
 prefix_unresolved_file_name = "3-unresolved-mul_"
+
+# Global "Current Line" (for signal processing)
+g_cur_line = 0
+
+### Signal handler
+
+# Main handler : save current line and exit
+def signal_graceful_exit():
+    print("ERROR: Stopped at line " + str(g_cur_line))
+    MyCommonTools.update_file_last_line(g_cur_line,
+                                        g_file_last_line_name)
+    sys.exit(-5)
+
+# SIGTERM handler
+def signal_term_handler(signal, frame):
+    print("!!!!! SIGTERM CAUGHT !!!!!")
+    signal_graceful_exit()
+
+# Default handler
+def signal_default_handler(signal, frame):
+    print("!!!!! SIGNAL (" + str(signal) + ") CAUGHT !!!!!")
+    signal_graceful_exit()
+
+# Declare which signals to handle
+def signal_declare_handlers():
+    ## SIGTERM = regular "kill"
+    signal.signal(signal.SIGTERM, signal_term_handler)
+    ## SIGINT = Ctrl+C
+    signal.signal(signal.SIGINT, signal_default_handler)
+    ## SIGABRT = abrot(3)
+    signal.signal(signal.SIGABRT, signal_default_handler)
+    ## SIGQUIT = quit from keyboard
+    signal.signal(signal.SIGQUIT, signal_default_handler)
+
 
 ### Small tools
 
@@ -272,10 +309,12 @@ def get_web_page(url):
 
 # For each line, get the web page and process each result-id
 def process_lines(lines):
+    global g_cur_line
     url_filename_input = os.path.basename(sys.argv[1])
 
     # File has been read and is in memory, everything is fine
     cur_line = 0
+    g_cur_line = 0
     max_line = len(lines)
     ## Open the temporary file for last processed line
     if (os.path.isfile(g_file_last_line_name)):
@@ -283,7 +322,10 @@ def process_lines(lines):
         file_last_line = fd.read()
         fd.close()
         cur_line = int(file_last_line)
+        g_cur_line = cur_line
 
+    # Be aware of signals from now [When context has been put back]
+    signal_declare_handlers()
     ## Update the unresolved log for saying an instance has been launched
     now = datetime.datetime.now()
     update_file_unresolved_log("# Launching URL multiple docs getter at " +
@@ -328,6 +370,7 @@ def process_lines(lines):
         print("#############################################################")
         # read next line
         cur_line += 1
+        g_cur_line = cur_line
 
     # If everything ended well, let's remove the cache file with last state
     if (os.path.exists(g_file_last_line_name)):

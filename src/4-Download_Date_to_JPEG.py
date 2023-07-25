@@ -6,6 +6,9 @@ import os
 import traceback
 import logging
 
+# Signal handler
+import signal
+
 # Regexp
 import re
 
@@ -49,6 +52,41 @@ g_file_last_line_name = "__4J-last_ark_id_jpeg_downloaded.cache"
 
 # File with unresolved URL
 prefix_undownloaded_file_name = "4J-undownloaded_"
+
+# Global "Current Line" (for signal processing)
+g_cur_line = 0
+
+
+### Signal handler
+
+# Main handler : save current line and exit
+def signal_graceful_exit():
+    print("ERROR: Stopped at line " + str(g_cur_line))
+    MyCommonTools.update_file_last_line(g_cur_line,
+                                        g_file_last_line_name)
+    sys.exit(-5)
+
+# SIGTERM handler
+def signal_term_handler(signal, frame):
+    print("!!!!! SIGTERM CAUGHT !!!!!")
+    signal_graceful_exit()
+
+# Default handler
+def signal_default_handler(signal, frame):
+    print("!!!!! SIGNAL (" + str(signal) + ") CAUGHT !!!!!")
+    signal_graceful_exit()
+
+# Declare which signals to handle
+def signal_declare_handlers():
+    ## SIGTERM = regular "kill"
+    signal.signal(signal.SIGTERM, signal_term_handler)
+    ## SIGINT = Ctrl+C
+    signal.signal(signal.SIGINT, signal_default_handler)
+    ## SIGABRT = abrot(3)
+    signal.signal(signal.SIGABRT, signal_default_handler)
+    ## SIGQUIT = quit from keyboard
+    signal.signal(signal.SIGQUIT, signal_default_handler)
+
 
 ### Small tools
 
@@ -203,8 +241,10 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
 
 # For each line, try to download all of the JPEG
 def process_lines(lines):
+    global g_cur_line
     # File has been read and is in memory, everything is fine
     cur_line = 0
+    g_cur_line = 0
     max_line = len(lines)
     ## Open the temporary file for last processed line
     if (os.path.isfile(g_file_last_line_name)):
@@ -212,7 +252,10 @@ def process_lines(lines):
         file_last_line = fd.read()
         fd.close()
         cur_line = int(file_last_line)
+        g_cur_line = cur_line
 
+    # Be aware of signals from now [When context has been put back]
+    signal_declare_handlers()
     ## Update the undownloaded log for saying an instance has been launched
     now = datetime.datetime.now()
     update_file_undownloaded_log("# Launching Ark ID downloader for debates at " +
@@ -262,12 +305,14 @@ def process_lines(lines):
         #if (pages_written == 1):
         #    update_file_unresolved_log(url)
         #    cur_line += 1
+        #    g_cur_line = cur_line
         #    continue
         ######################
 
         print("#############################################################")
         # read next line
         cur_line += 1
+        g_cur_line = cur_line
 
     # If everything ended well, let's remove the cache file with last state
     if (os.path.exists(g_file_last_line_name)):

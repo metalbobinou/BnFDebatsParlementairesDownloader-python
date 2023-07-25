@@ -6,6 +6,9 @@ import os
 import traceback
 import logging
 
+# Signal handler
+import signal
+
 # Regexp
 import re
 
@@ -50,6 +53,41 @@ prefix_external_file_name = "2-external_"
 
 # File with unresolved URL / Date has no document
 prefix_unresolved_file_name = "2-unresolved_"
+
+# Global "Current Line" (for signal processing)
+g_cur_line = 0
+
+
+### Signal handler
+
+# Main handler : save current line and exit
+def signal_graceful_exit():
+    print("ERROR: Stopped at line " + str(g_cur_line))
+    MyCommonTools.update_file_last_line(g_cur_line,
+                                        g_file_last_line_name)
+    sys.exit(-5)
+
+# SIGTERM handler
+def signal_term_handler(signal, frame):
+    print("!!!!! SIGTERM CAUGHT !!!!!")
+    signal_graceful_exit()
+
+# Default handler
+def signal_default_handler(signal, frame):
+    print("!!!!! SIGNAL (" + str(signal) + ") CAUGHT !!!!!")
+    signal_graceful_exit()
+
+# Declare which signals to handle                                                                        
+def signal_declare_handlers():
+    ## SIGTERM = regular "kill"
+    signal.signal(signal.SIGTERM, signal_term_handler)
+    ## SIGINT = Ctrl+C
+    signal.signal(signal.SIGINT, signal_default_handler)
+    ## SIGABRT = abort(3)
+    signal.signal(signal.SIGABRT, signal_default_handler)
+    ## SIGQUIT = quit from keyboard
+    signal.signal(signal.SIGQUIT, signal_default_handler)
+
 
 ### Small tools
 
@@ -209,6 +247,7 @@ def get_ressource_url(url):
 # Resolve a URL and extract its Ark ID
 ## Return value : Ark ID + contains multiple docs ? + external of gallica ?
 def get_ark_id_from_date_URL(url_date):
+    global g_cur_line
     # Let's resolve date URL and obtain the new URL
     #url_resolved = get_ressource_url(url_date)
     answers = get_ressource_url(url_date)
@@ -263,6 +302,7 @@ def process_lines(lines):
 
     # File has been read and is in memory, everything is fine
     cur_line = 0
+    g_cur_line = 0
     max_line = len(lines)
     ## Open the temporary file for last processed line
     if (os.path.isfile(g_file_last_line_name)):
@@ -270,7 +310,10 @@ def process_lines(lines):
         file_last_line = fd.read()
         fd.close()
         cur_line = int(file_last_line)
+        g_cur_line = cur_line
 
+    # Be aware of signals from now [When context has been put back]
+    signal_declare_handlers()
     ## Update the unresolved log for saying an instance has been launched
     now = datetime.datetime.now()
     update_file_unresolved_log("# Launching URL resolver/Ark ID solver at " +
@@ -321,6 +364,7 @@ def process_lines(lines):
             ###
             print("#############################################################")
             cur_line += 1
+            g_cur_line = cur_line
             continue
 
         # if resolved link is external of gallica, let's write it in specific file
@@ -331,6 +375,7 @@ def process_lines(lines):
             ###
             print("#############################################################")
             cur_line += 1
+            g_cur_line = cur_line
             continue
 
         # if everything OK, let's write the result in the output file
@@ -344,6 +389,7 @@ def process_lines(lines):
         print("#############################################################")
         # read next line
         cur_line += 1
+        g_cur_line = cur_line
 
     # If everything ended well, let's remove the cache file with last state
     if (os.path.exists(g_file_last_line_name)):
