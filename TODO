@@ -1,6 +1,8 @@
 # Highly Required :
-HR3 - check the logs and errors
 
+# Recommended :
+R1 - Change the name of the temporary file by a combination of a common
+  prefix + the name of the input file ?
 
 # Why not :
 WN1 - create another 3rd script that downloads TXT only
@@ -18,6 +20,7 @@ https://gallica.bnf.fr/ark:/12148/bpt6k3997476x/f2.highres
 # -- DONE --
 HR1 - put a date in front of the Ark ID for better management of the dates
 HR2 - create another 3rd script that downloads PDF only
+HR3 - check the logs and errors
 HR4 - modify script 2 for resolving multiple Ark ID behind one date
 Example:
 https://gallica.bnf.fr/ark:/12148/cb371291967/date.item
