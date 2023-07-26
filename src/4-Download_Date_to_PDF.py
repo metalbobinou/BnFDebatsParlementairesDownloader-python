@@ -211,7 +211,7 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
         #text = data.decode(info.get_param('charset', 'utf-8'))
         #text = data.decode('utf-8')
         print("## url_new : " + str(url_new))
-        print("## headers : " + str(headers))
+        #print("## headers : " + str(headers))
         print("## status  : " + str(status))
 
         # Write out the current file

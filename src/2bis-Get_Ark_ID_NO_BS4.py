@@ -66,7 +66,9 @@ def signal_term_handler(signal, frame):
 
 # Default handler
 def signal_default_handler(signal, frame):
-    print("!!!!! SIGNAL (" + str(signal) + ") CAUGHT !!!!!")
+    signal_num = str(sig_num)
+    signal_name = str(signal.Signals(sig_num).name)
+    print("!!!!! SIGNAL (" + signal_num + " " + signal_name + ") CAUGHT !!!!!")
     signal_graceful_exit()
 
 # Declare which signals to handle
