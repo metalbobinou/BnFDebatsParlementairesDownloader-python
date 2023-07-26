@@ -328,8 +328,13 @@ def process_lines(lines):
     signal_declare_handlers()
     ## Update the unresolved log for saying an instance has been launched
     now = datetime.datetime.now()
-    update_file_unresolved_log("# Launching URL multiple docs getter at " +
-                               now.strftime("%d/%m/%Y %H:%M:%S"))
+    try:
+        update_file_unresolved_log("# Launching URL multiple docs getter at " +
+                                   now.strftime("%d/%m/%Y %H:%M:%S"))
+    except IOErrror:
+        print("+++ IOError AT BEGINNING while writing in Unresolved log +++")
+        return (-3)
+
     # Continue the process of the file from the last state
     url_resolved_filename = prefix_resolved_bis_file_name + url_filename_input
     url_external_filename = prefix_external_bis_file_name + url_filename_input
@@ -360,13 +365,29 @@ def process_lines(lines):
         for new_url in URLs:
             ## If URL is external of Gallica, let's write it in specific file
             if (not (MyCommonTools.check_gallica_url(new_url))):
-                line_external = date + "-" + str(i) + " " + new_url
-                MyCommonTools.update_file_ouput(line_external, url_external_filename)
+                print("=> External URL")
+                try:
+                    line_external = date + "-" + str(i) + " " + new_url
+                    MyCommonTools.update_file_ouput(line_external,
+                                                    url_external_filename)
+                except IOError:
+                    print("+++ IOError while writing in External log +++")
+                    MyCommonTools.error_save_last_line(cur_line, date, url,
+                                                       g_file_last_line_name)
+                    return (-3)
             else:
                 ## else, let's put it in the regular file
-                ark_id = extract_ark_id_from_url(new_url)
-                line_resolved = date + "-" + str(i) + " " + ark_id
-                MyCommonTools.update_file_ouput(line_resolved, url_resolved_filename)
+                print("=> Document found")
+                try:
+                    ark_id = extract_ark_id_from_url(new_url)
+                    line_resolved = date + "-" + str(i) + " " + ark_id
+                    MyCommonTools.update_file_ouput(line_resolved, url_resolved_filename)
+                except IOError:
+                    print("+++ IOError while writing in Resolved log +++")
+                    MyCommonTools.error_save_last_line(cur_line, date, url,
+                                                       g_file_last_line_name)
+                    return (-3)
+
             i += 1
         ###
         print("#############################################################")
