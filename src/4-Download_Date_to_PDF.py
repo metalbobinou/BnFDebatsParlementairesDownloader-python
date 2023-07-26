@@ -213,10 +213,15 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
         print("## status  : " + str(status))
 
         # Write out the current file
-        out_file = open(directory_output + "/" + pdffile, 'wb')
-        out_file.truncate(0)
-        out_file.write(data)
-        out_file.close()
+        try:
+            out_file = open(directory_output + "/" + pdffile, 'wb')
+            out_file.truncate(0)
+            out_file.write(data)
+            out_file.close()
+        except IOError:
+            print("++++ IOError : Couldn't write the PDF output file ++++")
+            print("  output filename : " + str(directory_output + "/" + pdffile))
+            return (None, error_503)
 
         print("###################################")
 
@@ -243,8 +248,12 @@ def process_lines(lines):
     signal_declare_handlers()
     ## Update the undownloaded log for saying an instance has been launched
     now = datetime.datetime.now()
-    update_file_undownloaded_log("# Launching Ark ID downloader for debates at " +
-                                 now.strftime("%d/%m/%Y %H:%M:%S"))
+    try:
+        update_file_undownloaded_log("# Launching Ark ID downloader for debates at " +
+                                     now.strftime("%d/%m/%Y %H:%M:%S"))
+    except IOErrror:
+        print("+++ IOError AT BEGINNING while writing in Undownloaded log +++")
+        return (-3)
 
     ## Prepare output directory
     dirname_output = sys.argv[1]
@@ -272,15 +281,19 @@ def process_lines(lines):
 
         ## If an error occurred, let's save where we were
         if (pages_written == None):
-            line_undownloaded = date + " " + ark_id
-            update_file_undownloaded_log(line_undownloaded)
-            print("ERROR: Failed at line " + str(cur_line))
-            print("DATE : " + date)
-            print("ARK ID : " + ark_id)
-            ### IF YOU WISH TO STOP THE SCRIPT IN CASE OF ERROR, UNCOMMENT RETURN
-            MyCommonTools.update_file_last_line(cur_line,
-                                                g_file_last_line_name)
-            return (-3)
+            print("=> No document to download found")
+            try:
+                line_undownloaded = date + " " + ark_id
+                update_file_undownloaded_log(line_undownloaded)
+                ### IF YOU WISH TO STOP THE SCRIPT IN CASE OF ERROR, UNCOMMENT RETURN
+                MyCommonTools.error_save_last_line(cur_line, date, url,
+                                                   g_file_last_line_name)
+                return (-3)
+            except IOError:
+                print("+++ IOError while writing in Undownloaded log +++")
+                MyCommonTools.error_save_last_line(cur_line, date, url,
+                                                   g_file_last_line_name)
+                return (-3)
 
         ## If only one page were written... do something ? [unusable in the PDF case]
         #if (pages_written == 1):

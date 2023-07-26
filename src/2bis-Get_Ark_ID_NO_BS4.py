@@ -272,8 +272,12 @@ def process_lines(lines):
     signal_declare_handlers()
     ## Update the unresolved log for saying an instance has been launched
     now = datetime.datetime.now()
-    update_file_unresolved_log("# Launching URL resolver/Ark ID solver at " +
-                               now.strftime("%d/%m/%Y %H:%M:%S"))
+    try:
+        update_file_unresolved_log("# Launching URL resolver/Ark ID solver at " +
+                                   now.strftime("%d/%m/%Y %H:%M:%S"))
+    except IOError:
+        print("+++ IOError AT BEGINNING while writing in Unresolved log +++")
+        return (-3)
 
     # Continue the process of the file from the last state
     url_resolved_filename = prefix_resolved_file_name + url_filename_input
@@ -293,20 +297,29 @@ def process_lines(lines):
 
         # if ark_id was not found, write down the number where it failed and stop
         if (ark_id == None):
-            print("ERROR: Failed at line " + str(cur_line))
-            print("DATE : " + date)
-            print("URL : " + url)
-            MyCommonTools.update_file_last_line(cur_line,
-                                                g_file_last_line_name)
+            #print("ERROR: Failed at line " + str(cur_line))
+            #print("DATE : " + date)
+            #print("URL : " + url)
+            #MyCommonTools.update_file_last_line(cur_line,
+            #                                    g_file_last_line_name)
+            MyCommonTools.error_save_last_line(cur_line, date, url,
+                                               g_file_last_line_name)
             return (-3)
 
         # if URL hasn't changed, let's skip it (add write it in the unresolved log)
         if (ark_id == url):
             #update_file_unresolved_log(url)
             ### Add day and name of the day in the log
-            DOTW = MyCommonTools.get_day_or_the_week(date)
-            line_unresolved = date + " " + DOTW + " " + url
-            update_file_unresolved_log(line_unresolved)
+            print("=> Ark ID didn't changed (no documents, or multiples)")
+            try:
+                DOTW = MyCommonTools.get_day_or_the_week(date)
+                line_unresolved = date + " " + DOTW + " " + url
+                update_file_unresolved_log(line_unresolved)
+            except IOError:
+                 print("+++ IOError while writing in Unresolved log +++")
+                 MyCommonTools.error_save_last_line(cur_line, date, url,
+                                                    g_file_last_line_name)
+                 return (-3)
             ###
             print("#############################################################")
             cur_line += 1
@@ -315,9 +328,16 @@ def process_lines(lines):
 
         # if resolved link is external of gallica, let's write it in specific file
         if (external_gallica == True):
-            line_external = date + " " + url
-            MyCommonTools.update_file_ouput(line_external, url_external_filename)
             print("=> External URL")
+            try:
+                line_external = date + " " + url
+                MyCommonTools.update_file_ouput(line_external,
+                                                url_external_filename)
+            except IOError:
+                print("+++ IOError while writing in External log +++")
+                MyCommonTools.error_save_last_line(cur_line, date, url,
+                                                   g_file_last_line_name)
+                return (-3)
             ###
             print("#############################################################")
             cur_line += 1
@@ -329,8 +349,16 @@ def process_lines(lines):
         #update_file_ouput(ark_id, url_resolved_filename_output)
         ### Add date before Ark_ID
         # out format : "YYYY-MM-DD Ark_ID"
-        line_resolved = date + " " + ark_id
-        MyCommonTools.update_file_ouput(line_resolved, url_resolved_filename)
+        print("=> One document found")
+        try:
+            line_resolved = date + " " + ark_id
+            MyCommonTools.update_file_ouput(line_resolved,
+                                            url_resolved_filename)
+        except IOError:
+            print("+++ IOError while writing in Resolved log +++")
+            MyCommonTools.error_save_last_line(cur_line, date, url,
+                                               g_file_last_line_name)
+            return (-3)
         ###
         print("#############################################################")
         # read next line

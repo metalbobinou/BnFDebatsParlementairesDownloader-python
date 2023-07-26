@@ -82,7 +82,7 @@ def generate_list_of_dates(first_date, last_date):
 
     return (list_of_dates)
 
-# Create a list of URL from the list of dates
+# Create a list of URL from the list of dates (add prefix to the dates)
 def transform_list_of_dates_into_url(list_of_dates, url_prefix, url_suffix):
     list_of_url = []
     for date in list_of_dates:
@@ -124,15 +124,20 @@ def process_dates_prefix(first_date, last_date, prefix_url, suffix_url):
     # Generates list of dates
     dates_list = generate_list_of_dates(first_date, last_date)
 
-    # Generate a URL list from dates, and merges with dates
+    # Generated a URL list by extending the dates in a list
     url_list = transform_list_of_dates_into_url(dates_list,
                                                 prefix_url,
                                                 suffix_url)
     nb_lines = len(url_list)
 
     # Write out results
-    filename = prefix_list_file_name + first_date + "_"  + last_date + ".txt"
-    write_list_to_file(url_list, filename)
+    try:
+        filename = prefix_list_file_name + first_date + "_"  + last_date + ".txt"
+        write_list_to_file(url_list, filename)
+    except IOError:
+        print("+++ IOError while writing the output file +++")
+        print("  filename : " + str(filename))
+        return (-1)
 
     return (nb_lines)
 

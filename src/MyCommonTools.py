@@ -80,3 +80,14 @@ def check_gallica_url(url):
         return (False)
     else:
         return (True)
+
+
+### Errors and Exceptions tools
+
+# Write a message and save the context (the current processed line)
+def error_save_last_line(cur_line, date, url, g_file_last_line_name):
+    print("ERROR: Failed at line " + str(cur_line))
+    print("DATE : " + date)
+    print("URL : " + url)
+    update_file_last_line(cur_line,
+                          g_file_last_line_name)
