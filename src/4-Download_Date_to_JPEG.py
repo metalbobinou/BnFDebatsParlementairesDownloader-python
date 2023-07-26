@@ -315,12 +315,12 @@ def process_lines(lines):
                 line_undownloaded = date + " " + ark_id
                 update_file_undownloaded_log(line_undownloaded)
                 ### IF YOU WISH TO STOP THE SCRIPT IN CASE OF ERROR, UNCOMMENT NEXT LINES
-                MyCommonTools.error_save_last_line(cur_line, date, url,
+                MyCommonTools.error_save_last_line(cur_line, date, ark_id,
                                                    g_file_last_line_name)
                 return (-3)
             except IOError:
                 print("+++ IOError while writing in Undownloaded log +++")
-                MyCommonTools.error_save_last_line(cur_line, date, url,
+                MyCommonTools.error_save_last_line(cur_line, date, ark_id,
                                                    g_file_last_line_name)
                 return (-3)
 

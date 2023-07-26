@@ -63,8 +63,10 @@ def signal_term_handler(signal, frame):
     signal_graceful_exit()
 
 # Default handler
-def signal_default_handler(signal, frame):
-    print("!!!!! SIGNAL (" + str(signal) + ") CAUGHT !!!!!")
+def signal_default_handler(sig_num, frame):
+    signal_num = str(sig_num)
+    signal_name = str(signal.Signals(sig_num).name)
+    print("!!!!! SIGNAL (" + signal_num + " " + signal_name + ") CAUGHT !!!!!")
     signal_graceful_exit()
 
 # Declare which signals to handle
@@ -286,12 +288,12 @@ def process_lines(lines):
                 line_undownloaded = date + " " + ark_id
                 update_file_undownloaded_log(line_undownloaded)
                 ### IF YOU WISH TO STOP THE SCRIPT IN CASE OF ERROR, UNCOMMENT RETURN
-                MyCommonTools.error_save_last_line(cur_line, date, url,
+                MyCommonTools.error_save_last_line(cur_line, date, ark_id,
                                                    g_file_last_line_name)
                 return (-3)
             except IOError:
                 print("+++ IOError while writing in Undownloaded log +++")
-                MyCommonTools.error_save_last_line(cur_line, date, url,
+                MyCommonTools.error_save_last_line(cur_line, date, ark_id,
                                                    g_file_last_line_name)
                 return (-3)
 
