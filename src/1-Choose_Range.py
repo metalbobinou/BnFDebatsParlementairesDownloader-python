@@ -138,6 +138,7 @@ def process_dates_prefix(first_date, last_date, prefix_url, suffix_url):
         print("+++ IOError while writing the output file +++")
         print("  filename : " + str(filename))
         return (-1)
+    print("<<< LIST PROCESSING CORRECTLY FINISHED ! >>>")
 
     return (nb_lines)
 
