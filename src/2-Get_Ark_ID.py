@@ -460,6 +460,7 @@ def process_lines(lines):
         os.rename(url_external_filename, url_external_filename_final)
     else:
         print("--no external cases file were created during this script--")
+    print("<<< LIST PROCESSING CORRECTLY FINISHED ! >>>")
 
     return (0)
 
