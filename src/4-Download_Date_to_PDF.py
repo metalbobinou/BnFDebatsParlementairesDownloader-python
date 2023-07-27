@@ -316,6 +316,7 @@ def process_lines(lines):
     # And let's rename the folder by adding a "_FINAL" inside
     dirname_final = dirname_output + "_PDF" + "_" + MyCommonTools.get_date_and_time()
     os.rename(dirname_output + "_WIP_PDF",  dirname_final)
+    print("<<< LIST PROCESSING CORRECTLY FINISHED ! >>>")
 
     return (0)
 
