@@ -135,12 +135,7 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
 
     # Exception HTTP Error
     except urllib.error.HTTPError as e:
-        ## Error 503 : we reached the end of the document
-        if (page == 1):
-            print("### HTTP ERROR ON PAGE 1:")
-        else:
-            print("### HTTP ERROR:")
-
+        print("### HTTP ERROR:")
         if hasattr(e, 'reason'):
             print('Failed to reach a server.')
             print('Reason: ', e.reason)
