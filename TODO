@@ -1,3 +1,7 @@
+# Critical :
+C1 - line 230 of script 4 ( data = response.read() ) may sometime crashes...
+     Test it with a "try / except" for handling stop here...
+
 # Highly Required :
 
 # Recommended :
