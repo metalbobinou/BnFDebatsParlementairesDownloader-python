@@ -214,7 +214,7 @@ def get_ark_id_from_date_URL(url_date):
     external_gallica = False
 
     # if resolved URL is empty, let's write it
-    if (url_resolved == None):
+    if (url_resolved is None):
         print("## Error :")
         print("  no ressource found")
         print("url_date : --" + url_date + "--")
@@ -241,7 +241,7 @@ def get_ark_id_from_date_URL(url_date):
     url_no_suffix = remove_suffix_item_from_url(url_resolved)
     ## next, let's remove the prefix : the http[s]://...
     ark_id = remove_prefix_https_from_url(url_no_suffix)
-    if (ark_id == None):
+    if (ark_id is None):
         print("## Error :")
         print("  can't find the Ark ID in the URL")
         print("url_date : --" + url_date + "--")
@@ -298,7 +298,7 @@ def process_lines(lines):
         external_gallica = answers[1]
 
         # if ark_id was not found, write down the number where it failed and stop
-        if (ark_id == None):
+        if (ark_id is None):
             #print("ERROR: Failed at line " + str(cur_line))
             #print("DATE : " + date)
             #print("URL : " + url)
@@ -400,7 +400,7 @@ def main():
         print("File list_of_URLs format: [one URL per line]")
         print("[date] [URL]")
         print("date : YYYY-MM-DD     URL : https://gallica.bnf.fr/ark:/...")
-        exit(-1)
+        sys.exit(-1)
     else:
         url_filename_input = sys.argv[1]
         # Check if file is readable
@@ -422,13 +422,13 @@ def main():
             print("File list_of_URLs format: [one URL per line]")
             print("[date] [URL]")
             print("date : YYYY-MM-DD     URL : https://gallica.bnf.fr/ark:/...")
-            exit(-2)
+            sys.exit(-2)
 
         # In other case, when evrything is fine, let's process lines
         MyCommonTools.print_time("%%%% BEGIN PROCESSING")
         ret = process_lines(lines)
         MyCommonTools.print_time("%%%% END PROCESSING")
 
-        exit(ret)
+        sys.exit(ret)
 
 main()

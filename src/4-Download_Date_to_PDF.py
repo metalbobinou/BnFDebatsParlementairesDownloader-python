@@ -135,7 +135,12 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
 
     # Exception HTTP Error
     except urllib.error.HTTPError as e:
-        print("### HTTP ERROR:")
+        ## Error 503 : we reached the end of the document
+        if (page == 1):
+            print("### HTTP ERROR ON PAGE 1:")
+        else:
+            print("### HTTP ERROR:")
+
         if hasattr(e, 'reason'):
             print('Failed to reach a server.')
             print('Reason: ', e.reason)
@@ -197,12 +202,20 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
     else:
         print("OK")
 
-        # Get HTTP response
-        data = response.read()
-        info = response.info()
-        url_new = response.url
-        headers = response.headers
-        status = response.status
+        # Read HTTP response
+        try:
+            data = response.read()
+            info = response.info()
+            url_new = response.url
+            headers = response.headers
+            status = response.status
+        except Exception as e:
+            print("--- UNKNOWN ERROR WHILE READING HTTP RESPONSE: ---")
+            print(str(e))
+            print("#############")
+            logging.error(traceback.format_exc())
+            return (None)
+
         #text = data.decode(info.get_param('charset', 'utf-8'))
         #text = data.decode('utf-8')
         print("## url_new : " + str(url_new))
@@ -218,7 +231,7 @@ def get_document_PDF_debat_parlementaire(ark_id, directory_output, filename_pref
         except IOError:
             print("++++ IOError : Couldn't write the PDF output file ++++")
             print("  output filename : " + str(directory_output + "/" + pdffile))
-            return (None, error_503)
+            return (None)
 
         print("###################################")
 
@@ -277,7 +290,7 @@ def process_lines(lines):
                                                              filename_prefix)
 
         ## If an error occurred, let's save where we were
-        if (pages_written == None):
+        if (pages_written is None):
             print("=> No document to download found")
             try:
                 line_undownloaded = date + " " + ark_id
@@ -326,7 +339,7 @@ def main():
         print("File list_of_Ark_IDs format: [one Ark ID per line]")
         print("[date] [Ark ID]")
         print("date : YYYY-MM-DD     Ark ID : /12148/bpt6k64490143")
-        exit(-1)
+        sys.exit(-1)
     else:
         ark_id_filename_input = sys.argv[2]
         # Check if file is readable
@@ -348,7 +361,7 @@ def main():
             print("File list_of_Ark_IDs format: [one Ark ID per line]")
             print("[date] [Ark ID]")
             print("date : YYYY-MM-DD     Ark ID : /12148/bpt6k64490143")
-            exit(-2)
+            sys.exit(-2)
 
 
         # In other case, when evrything is fine, let's process lines
@@ -356,6 +369,6 @@ def main():
         ret = process_lines(lines)
         MyCommonTools.print_time("%%%% END PROCESSING")
 
-        exit(ret)
+        sys.exit(ret)
 
 main()

@@ -209,14 +209,22 @@ def get_ressource_url(url):
     else:
         print("OK")
 
-        #data = response.read()
-        #content = str(data.decode('utf-8'))
-        #text = data.decode(info.get_param('charset', 'utf-8'))
-        html = response.read().decode(response.info().get_param('charset') or 'utf-8')
-        info = response.info()
-        url_new = response.url
-        headers = response.headers
-        status = response.status
+        # Read the HTTP response
+        try:
+            #data = response.read()
+            #content = str(data.decode('utf-8'))
+            #text = data.decode(info.get_param('charset', 'utf-8'))
+            html = response.read().decode(response.info().get_param('charset') or 'utf-8')
+            info = response.info()
+            url_new = response.url
+            headers = response.headers
+            status = response.status
+        except Exception as e:
+            print("--- UNKNOWN ERROR WHILE READING HTTP RESPONSE: ---")
+            print(str(e))
+            print("#############")
+            logging.error(traceback.format_exc())
+            return (None, None)
 
         print("## url_new : " + str(url_new))
         #print("## headers : " + str(headers))
@@ -476,7 +484,7 @@ def main():
         print("File list_of_URLs format: [one URL per line]")
         print("[date] [URL]")
         print("date : YYYY-MM-DD     URL : https://gallica.bnf.fr/ark:/...")
-        exit(-1)
+        sys.exit(-1)
     else:
         url_filename_input = sys.argv[1]
         # Check if file is readable
@@ -498,13 +506,13 @@ def main():
             print("File list_of_URLs format: [one URL per line]")
             print("[date] [URL]")
             print("date : YYYY-MM-DD     URL : https://gallica.bnf.fr/ark:/...")
-            exit(-2)
+            sys.exit(-2)
 
         # In other case, when evrything is fine, let's process lines
         MyCommonTools.print_time("%%%% BEGIN PROCESSING")
         ret = process_lines(lines)
         MyCommonTools.print_time("%%%% END PROCESSING")
 
-        exit(ret)
+        sys.exit(ret)
 
 main()

@@ -429,7 +429,7 @@ def main():
         print("File list_of_URLs format: [one URL per line]")
         print("[date] [URL]")
         print("date : YYYY-MM-DD     URL : https://gallica.bnf.fr/ark:/...")
-        exit(-1)
+        sys.exit(-1)
     else:
         url_filename_input = sys.argv[1]
         # Check if file is readable
@@ -451,13 +451,13 @@ def main():
             print("File list_of_URLs format: [one URL per line]")
             print("[date] [URL]")
             print("date : YYYY-MM-DD     URL : https://gallica.bnf.fr/ark:/...")
-            exit(-2)
+            sys.exit(-2)
 
 	# In other case, when evrything is fine, let's process lines
         MyCommonTools.print_time("%%%% BEGIN PROCESSING")
         ret = process_lines(lines)
         MyCommonTools.print_time("%%%% END PROCESSING")
 
-        exit(ret)
+        sys.exit(ret)
 
 main()

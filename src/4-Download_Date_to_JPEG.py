@@ -221,17 +221,24 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
             logging.error(traceback.format_exc())
             return (None, error_503)
 
-        # Everything is fine
+        # Everything is fine during the connection
         else:
             print("OK - p." + str(page))
 
-            # Get HTTP response
+            # Read the HTTP response
+            try:
+                data = response.read()
+                info = response.info()
+                url_new = response.url
+                headers = response.headers
+                status = response.status
+            except Exception as e:
+                print("--- UNKNOWN ERROR WHILE READING HTTP RESPONSE: ---")
+                print(str(e))
+                print("#############")
+                logging.error(traceback.format_exc())
+                return (None, error_503)
 
-            data = response.read()
-            info = response.info()
-            url_new = response.url
-            headers = response.headers
-            status = response.status
             #text = data.decode(info.get_param('charset', 'utf-8'))
             #text = data.decode('utf-8')
             print("## url_new : " + str(url_new))
@@ -311,7 +318,7 @@ def process_lines(lines):
 
         ## If an error occurred, let's save where we were
         ##   Error => when no pages were downloaded + no error 503 happened
-        if ((pages_written == None) and (error_503 == False)):
+        if ((pages_written is None) and (error_503 == False)):
             print("=> No document to download found")
             try:
                 line_undownloaded = date + " " + ark_id
@@ -360,7 +367,7 @@ def main():
         print("File list_of_Ark_IDs format: [one Ark ID per line]")
         print("[date] [Ark ID]")
         print("date : YYYY-MM-DD     Ark ID : /12148/bpt6k64490143")
-        exit(-1)
+        sys.exit(-1)
     else:
         ark_id_filename_input = sys.argv[2]
         # Check if file is readable
@@ -382,7 +389,7 @@ def main():
             print("File list_of_Ark_IDs format: [one Ark ID per line]")
             print("[date] [Ark ID]")
             print("date : YYYY-MM-DD     Ark ID : /12148/bpt6k64490143")
-            exit(-2)
+            sys.exit(-2)
 
 
         # In other case, when evrything is fine, let's process lines
@@ -390,6 +397,6 @@ def main():
         ret = process_lines(lines)
         MyCommonTools.print_time("%%%% END PROCESSING")
 
-        exit(ret)
+        sys.exit(ret)
 
 main()
