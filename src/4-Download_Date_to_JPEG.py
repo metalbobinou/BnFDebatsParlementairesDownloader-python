@@ -232,8 +232,8 @@ def get_document_debat_parlementaire(ark_id, directory_output, filename_prefix):
                 url_new = response.url
                 headers = response.headers
                 status = response.status
-            except Exception as e:
-                print("--- UNKNOWN ERROR WHILE READING HTTP RESPONSE: ---")
+            except http.client.IncompleteRead as e:
+                print("--- ERROR : INCOMPLETE HTTP RESPONSE ---")
                 print(str(e))
                 print("#############")
                 logging.error(traceback.format_exc())

@@ -191,11 +191,19 @@ def get_ressource_url(url):
     else:
         print("OK")
 
-        data = response.read()
-        url_new = response.url
-        headers = response.headers
-        status = response.status
-        #text = data.decode(info.get_param('charset', 'utf-8'))
+        # Read the HTTP response
+        try:
+            data = response.read()
+            url_new = response.url
+            headers = response.headers
+            status = response.status
+            #text = data.decode(info.get_param('charset', 'utf-8'))
+        except http.client.IncompleteRead as e:
+            print("--- ERROR : INCOMPLETE HTTP RESPONSE ---")
+            print(str(e))
+            print("#############")
+            logging.error(traceback.format_exc())
+            return (None)
 
         print("## url_new : " + str(url_new))
         print("## headers : " + str(headers))
