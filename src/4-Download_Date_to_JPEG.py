@@ -17,6 +17,7 @@ import datetime
 
 # HTTP & URL
 import urllib.request
+import http.client
 
 ### Contains small tools for dates and others
 import MyCommonTools
