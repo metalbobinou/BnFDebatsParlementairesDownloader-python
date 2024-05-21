@@ -32,6 +32,7 @@ from selenium.webdriver.common.by import By
 
 # Selelnium Firefox
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 
 # Selenium exceptions
 from selenium.common.exceptions import NoSuchElementException
@@ -170,9 +171,19 @@ def get_web_page(url):
         #options.add_argument("--headless")
         #driver = webdriver.Chrome(options=options)
         ## Firefox & No GUI
-        options = Options()
+        ##### Selenium 3
+        #options = Options()
+        #options.add_argument("--headless")
+        #driver = webdriver.Firefox(options=options)
+        ##### Selenium 4+
+        #driver_path = f"{settings.BASE_DIR}/geckodriver"
+        driver_path="/snap/firefox/4209/usr/lib/firefox/geckodriver"
+        options = webdriver.FirefoxOptions()
+        #options.binary_location = "/usr/lib/firefox"
+        options.binary_location = "/snap/bin/firefox"
         options.add_argument("--headless")
-        driver = webdriver.Firefox(options=options)
+        driver = webdriver.Firefox(service=Service(executable_path=driver_path), options=options)
+        #####
         ## Force size 2
         #driver.set_window_size(500, 300)
         #size = driver.get_window_size()
