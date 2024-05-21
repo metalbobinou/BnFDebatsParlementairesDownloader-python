@@ -170,19 +170,23 @@ def get_web_page(url):
         #options = webdriver.ChromeOptions()
         #options.add_argument("--headless")
         #driver = webdriver.Chrome(options=options)
+
         ## Firefox & No GUI
         ##### Selenium 3
         #options = Options()
         #options.add_argument("--headless")
         #driver = webdriver.Firefox(options=options)
         ##### Selenium 4+
-        #driver_path = f"{settings.BASE_DIR}/geckodriver"
-        driver_path="/snap/firefox/4209/usr/lib/firefox/geckodriver"
+        ##driver_path = f"{settings.BASE_DIR}/geckodriver"
+        #driver_path="/snap/firefox/4209/usr/lib/firefox/geckodriver"
+        #options = webdriver.FirefoxOptions()
+        ##options.binary_location = "/usr/lib/firefox"
+        #options.binary_location = "/snap/bin/firefox"
+        #options.add_argument("--headless")
+        #driver = webdriver.Firefox(service=Service(executable_path=driver_path), options=options)
         options = webdriver.FirefoxOptions()
-        #options.binary_location = "/usr/lib/firefox"
-        options.binary_location = "/snap/bin/firefox"
         options.add_argument("--headless")
-        driver = webdriver.Firefox(service=Service(executable_path=driver_path), options=options)
+        driver = webdriver.Firefox(options=options)
         #####
         ## Force size 2
         #driver.set_window_size(500, 300)
