@@ -27,12 +27,13 @@ from selenium import webdriver
 #from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 
-# Selenium Chromium
-#from selenium.webdriver.chrome.options import Options
+# Selenium Chrome & Chromium
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
 # Selelnium Firefox
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
+#from selenium.webdriver.firefox.options import Options
+#from selenium.webdriver.firefox.service import Service
 
 # Selenium exceptions
 from selenium.common.exceptions import NoSuchElementException
@@ -162,14 +163,33 @@ def get_web_page(url):
 
     # Open a browser without GUI/in a terminal
     try:
-        ## Chromium & Force size 1
+        ## Cerome
+        #### Force size 1
         #options1 = Options()
         #options1.add_argument("window-size=500,300")
         #driver = webdriver.Chrome(chrome_options=options1)
-        ## Chromium & No GUI
+        #### No GUI
         #options = webdriver.ChromeOptions()
-        #options.add_argument("--headless")
+        #options.add_argument("--headless=new")
         #driver = webdriver.Chrome(options=options)
+        #print("-- Chrome arguments prepared --")
+
+        ## Chromium
+        #### Method 1
+        options = Options()
+        options.BinaryLocation = "/usr/bin/chromium-browser"
+        driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver",options=options)
+        #### Method 2
+        #options = webdriver.ChromeOptions()
+        #options.headless = True
+        ##options.BinaryLocation = "/usr/bin/chromium-browser"
+        ##options.add_argument("--headless=new")
+        #options.add_argument("--headless")
+        #options.add_argument("--no-sandbox");
+        #options.add_argument("--disable-dev-shm-usage");
+        #driver = webdriver.Chrome(options=options)
+        ##driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver",options=options)
+        print("-- Chromium arguments prepared --")
 
         ## Firefox & No GUI
         ##### Selenium 3
@@ -183,14 +203,13 @@ def get_web_page(url):
         ##options.binary_location = "/usr/lib/firefox"
         #options.binary_location = "/snap/bin/firefox"
         #options.add_argument("--headless")
+        ##driver = webdriver.Firefox(options=options)
         #driver = webdriver.Firefox(service=Service(executable_path=driver_path), options=options)
-        options = webdriver.FirefoxOptions()
-        options.add_argument("--headless")
-        driver = webdriver.Firefox(options=options)
         #####
         ## Force size 2
         #driver.set_window_size(500, 300)
         #size = driver.get_window_size()
+        #print("-- Firefox arguments prepared --")
 
     # Failure in opening
     except (NoSuchElementException, WebDriverException) as e:

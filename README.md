@@ -7,6 +7,12 @@ Downloader in python for the BnF collection "Débats Parlementaires" (Parliament
 - Beautiful Soup 4
 - Selenium
 
+One browser:
+- Chrome
+- Chromium
+ sudo apt-get install chromium-chromedriver
+- Firefox
+
 # Usage:
 1) __1-Choose_Range.py__ generates a file with a list of URL to test
 2) __2-Get_Ark_ID.py__ tests each URL and generates :
